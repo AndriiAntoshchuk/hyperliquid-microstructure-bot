@@ -1,0 +1,8 @@
+README.md
+pyproject.toml
+src/hlbot/__init__.py
+src/hyperliquid_microstructure_bot.egg-info/PKG-INFO
+src/hyperliquid_microstructure_bot.egg-info/SOURCES.txt
+src/hyperliquid_microstructure_bot.egg-info/dependency_links.txt
+src/hyperliquid_microstructure_bot.egg-info/requires.txt
+src/hyperliquid_microstructure_bot.egg-info/top_level.txt
