@@ -1,0 +1,20 @@
+--- a/hummingbot/connector/derivative/hyperliquid_perpetual/hyperliquid_perpetual_derivative.py
++++ b/hummingbot/connector/derivative/hyperliquid_perpetual/hyperliquid_perpetual_derivative.py
+@@ -52,7 +52,7 @@
+             trading_pairs: Optional[List[str]] = None,
+             trading_required: bool = True,
+             domain: str = CONSTANTS.DOMAIN,
+-            enable_hip3_markets: bool = True,
++            enable_hip3_markets: bool = False,
+     ):
+         self.hyperliquid_perpetual_address = hyperliquid_perpetual_address
+         self.hyperliquid_perpetual_secret_key = hyperliquid_perpetual_secret_key
+--- a/hummingbot/core/rate_oracle/sources/hyperliquid_perpetual_rate_source.py
++++ b/hummingbot/core/rate_oracle/sources/hyperliquid_perpetual_rate_source.py
+@@ -62,5 +62,5 @@
+             hyperliquid_perpetual_mode = "arb_wallet",
+             hyperliquid_perpetual_address="",
+             trading_required=False,
+-            enable_hip3_markets=True,
++            enable_hip3_markets=False,
+         )

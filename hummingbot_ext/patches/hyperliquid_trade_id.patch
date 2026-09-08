@@ -1,0 +1,11 @@
+--- a/hummingbot/connector/derivative/hyperliquid_perpetual/hyperliquid_perpetual_api_order_book_data_source.py
++++ b/hummingbot/connector/derivative/hyperliquid_perpetual/hyperliquid_perpetual_api_order_book_data_source.py
+@@ -263,7 +263,7 @@
+                 "trading_pair": trading_pair,
+                 "trade_type": float(TradeType.SELL.value) if trade_data["side"] == "A" else float(
+                     TradeType.BUY.value),
+-                "trade_id": trade_data["hash"],
++                "trade_id": f"{trade_data['time']}:{exchange_symbol}:{trade_data['tid']}",
+                 "price": float(trade_data["px"]),
+                 "amount": float(trade_data["sz"])
+             }, timestamp=trade_data["time"] * 1e-3)
