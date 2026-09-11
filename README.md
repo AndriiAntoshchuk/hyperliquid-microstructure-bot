@@ -1,85 +1,124 @@
-Hummingbot Integration
+# Hummingbot Integration
 
-This directory contains the Hummingbot-specific integration used by the Hyperliquid Microstructure Bot project.
+Hummingbot-specific integration used by the **Hyperliquid Microstructure Bot** project.
 
-The main research and strategy code lives separately under:
+The main research and strategy code lives under:
 
+```text
 src/hlbot/
+```
 
-This directory only contains code and patches required to connect the project to Hummingbot.
+---
 
-Collector
+## Market Data Collector
 
-download_order_book_and_trades.py collects:
+`download_order_book_and_trades.py` collects:
 
-Hyperliquid public trades
-L2 order-book snapshots
-Exchange timestamps
-Local receive timestamps
-Order-book update IDs
-Collector version metadata
+- Hyperliquid public trades
+- L2 order-book snapshots
+- Exchange timestamps
+- Local receive timestamps
+- Order-book update IDs
+- Collector version metadata
 
-Current default market:
+### Default Market
 
+```text
 PONS-USD
+```
 
-The collector also avoids repeatedly writing stale order books by tracking:
+Stale order-book snapshots are filtered using:
 
+```python
 order_book.snapshot_uid
-Hyperliquid Trade ID Patch
+```
+
+---
+
+## Hyperliquid Trade ID Fix
 
 Hummingbot originally used the Hyperliquid transaction hash as the public trade ID.
 
-A single Hyperliquid transaction can contain multiple fills, so the transaction hash is not guaranteed to uniquely identify each fill.
+A single transaction can contain multiple fills, so the transaction hash is not necessarily unique for every fill.
 
-The patch changes the trade ID to:
+The collector instead uses:
 
+```text
 time:coin:tid
+```
 
-Patch file:
+Patch:
 
+```text
 patches/hyperliquid_trade_id.patch
-HIP-3 Workaround
+```
 
-During development, Hyperliquid testnet HIP-3 market loading caused repeated HTTP 429 rate-limit errors.
+---
 
-The temporary workaround disables HIP-3 market loading.
+## HIP-3 Workaround
 
-Patch file:
+During development, Hyperliquid testnet HIP-3 market loading caused repeated HTTP `429` rate-limit errors.
 
+The current workaround disables HIP-3 market loading.
+
+Patch:
+
+```text
 patches/hyperliquid_disable_hip3.patch
+```
 
-This workaround should be reviewed when upgrading Hummingbot.
+> This workaround should be reviewed when upgrading Hummingbot.
 
-Check Patches
+---
 
-From the project root:
+## Usage
 
+### Check Patches
+
+Verify that the patches are compatible with the local Hummingbot source:
+
+```bash
 ./hummingbot_ext/check_patches.sh
+```
 
-This verifies that the patches are compatible with the local Hummingbot source.
+### Apply Patches
 
-Apply Patches
+```bash
 ./hummingbot_ext/apply_patches.sh
+```
+
+### Install Collector
+
+```bash
+./hummingbot_ext/install_collector.sh
+```
 
 By default, the scripts expect Hummingbot at:
 
+```text
 ~/Documents/Hummingbot
+```
 
 A different Hummingbot path can be supplied as the first argument.
 
-Install Collector
-./hummingbot_ext/install_collector.sh
+---
 
-This copies the version-controlled collector into:
+## Project Separation
 
-Hummingbot/scripts/download_order_book_and_trades.py
-Attribution
+```text
+src/hlbot/
+└── Quantitative research, models, validation, backtesting and strategy
+
+hummingbot_ext/
+└── Hummingbot integration, collector and connector patches
+```
+
+---
+
+## Attribution
 
 Hummingbot is an open-source project maintained by the Hummingbot Foundation.
 
-Files and patches in this directory integrate with or modify Hummingbot code.
+Files in this directory integrate with or modify Hummingbot components. The quantitative research and strategy components of this repository are developed separately under `src/hlbot/`.
 
-The rest of this repository is developed separately as part of the Hyperliquid Microstructure Bot research project.
-
-See the upstream Hummingbot repository and license for the applicable licensing terms.
+See the upstream Hummingbot repository and license for applicable licensing terms.
