@@ -9,3 +9,8 @@ __pycache__/
 *.sqlite
 *.db
 *.log
+*.egg-info/
+data/raw/**
+data/processed/**
+!data/raw/.gitkeep
+!data/processed/.gitkeep
