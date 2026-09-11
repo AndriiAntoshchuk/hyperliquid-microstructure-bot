@@ -1,7 +1,0 @@
-Metadata-Version: 2.4
-Name: hyperliquid-microstructure-bot
-Version: 0.1.0
-Summary: Quantitative research and execution framework for Hyperliquid market microstructure.
-Requires-Python: >=3.11
-Provides-Extra: dev
-Requires-Dist: pytest>=8.0; extra == "dev"
