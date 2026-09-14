@@ -1,0 +1,10 @@
+script_file_name: download_order_book_and_trades.py
+controllers_config: []
+
+exchange: hyperliquid_perpetual
+
+trading_pairs:
+  - PONS-USD
+  - CASHCAT-USD
+  - PURR-USD
+  - LIT-USD
