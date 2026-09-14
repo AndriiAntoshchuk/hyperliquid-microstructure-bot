@@ -1,5 +1,6 @@
 import json
 from dataclasses import asdict
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -20,14 +21,35 @@ class HyperliquidWalletLoader:
         self._validate_wallet(wallet)
 
         raw_fills = self._download_raw(wallet, start_time_ms, end_time_ms)
-        fills = self._normalize(wallet, raw_fills)
-        fills = self._deduplicate(fills)
+        fills = self._deduplicate(self._normalize(wallet, raw_fills))
+        batch_name = self._batch_name(wallet, start_time_ms, end_time_ms)
 
-        self._save_raw(wallet, raw_fills)
-        self._save_processed(wallet, fills)
+        self._save_raw(batch_name, raw_fills)
+        self._save_processed(batch_name, fills)
 
         history_may_be_incomplete = len(raw_fills) >= MAX_AVAILABLE_FILLS
         return fills, history_may_be_incomplete
+
+    def load_saved(self, wallet: str) -> list[WalletFill]:
+        self._validate_wallet(wallet)
+
+        directory = self.data_dir / "processed" / "wallets"
+        if not directory.exists(): return []
+
+        wallet = wallet.lower()
+        paths = sorted(directory.glob(f"{wallet}_*_fills.jsonl"))
+
+        legacy_path = directory / f"{wallet}_fills.jsonl"
+        if legacy_path.exists(): paths.insert(0, legacy_path)
+
+        fills = []
+
+        for path in paths:
+            with path.open() as file:
+                for line in file:
+                    if line.strip(): fills.append(WalletFill(**json.loads(line)))
+
+        return self._deduplicate(fills)
 
     def _download_raw(self, wallet: str, start_time_ms: int, end_time_ms: int | None) -> list[dict[str, Any]]:
         fills = []
@@ -106,18 +128,25 @@ class HyperliquidWalletLoader:
 
         return sorted(unique, key=lambda fill: fill.timestamp)
 
-    def _save_raw(self, wallet: str, fills: list[dict[str, Any]]) -> None:
+    @staticmethod
+    def _batch_name(wallet: str, start_time_ms: int, end_time_ms: int | None) -> str:
+        start = datetime.fromtimestamp(start_time_ms / 1000, timezone.utc).strftime("%Y-%m-%d")
+        end = datetime.fromtimestamp(end_time_ms / 1000, timezone.utc).strftime("%Y-%m-%d") if end_time_ms is not None else "open"
+        downloaded = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+        return f"{wallet.lower()}_{start}_{end}_{downloaded}"
+
+    def _save_raw(self, batch_name: str, fills: list[dict[str, Any]]) -> None:
         directory = self.data_dir / "raw" / "wallets"
         directory.mkdir(parents=True, exist_ok=True)
 
-        with open(directory / f"{wallet.lower()}_fills.json", "w") as file:
+        with open(directory / f"{batch_name}_raw.json", "w") as file:
             json.dump(fills, file, indent=2)
 
-    def _save_processed(self, wallet: str, fills: list[WalletFill]) -> None:
+    def _save_processed(self, batch_name: str, fills: list[WalletFill]) -> None:
         directory = self.data_dir / "processed" / "wallets"
         directory.mkdir(parents=True, exist_ok=True)
 
-        with open(directory / f"{wallet.lower()}_fills.jsonl", "w") as file:
+        with open(directory / f"{batch_name}_fills.jsonl", "w") as file:
             for fill in fills: file.write(json.dumps(asdict(fill)) + "\n")
 
     @staticmethod

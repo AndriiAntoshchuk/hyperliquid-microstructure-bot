@@ -1,31 +1,20 @@
 import argparse
 import glob
-import json
 from collections import defaultdict
 from pathlib import Path
 from statistics import mean
 
 from hlbot.data.coverage import find_coverage_segments, timestamp_has_coverage
 from hlbot.data.market_data_loader import load_order_books, load_trades
-from hlbot.models.wallet_fill import WalletFill
+from hlbot.data.wallet_loader import HyperliquidWalletLoader
 from hlbot.research.event_study import DEFAULT_MAX_SNAPSHOT_AGE, DEFAULT_OFFSETS, build_event_study, capture_market_point, sample_inactive_times
 from hlbot.wallet_analysis.episode_builder import EpisodeBuilder
 
 COVERAGE_MAX_GAP = 15
 COVERAGE_MARGIN = max(abs(offset) for offset in DEFAULT_OFFSETS)
 
-def load_wallet_fills(wallet: str) -> list[WalletFill]:
-    path = Path("data/processed/wallets") / f"{wallet.lower()}_fills.jsonl"
-
-    if not path.exists(): raise FileNotFoundError(f"Wallet data not found: {path}")
-
-    fills = []
-
-    with open(path) as file:
-        for line in file:
-            if line.strip(): fills.append(WalletFill(**json.loads(line)))
-
-    return fills
+def load_wallet_fills(wallet: str):
+    return HyperliquidWalletLoader().load_saved(wallet)
 
 def load_market_data(hummingbot_dir: str):
     book_files = sorted(glob.glob(f"{hummingbot_dir}/data/hyperliquid_perpetual_PONS-USD_order_book_snapshots_*.txt"))

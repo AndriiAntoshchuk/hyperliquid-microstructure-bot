@@ -6,7 +6,7 @@ from hlbot.data.coverage import CoverageSegment, timestamp_has_coverage
 from hlbot.features.liquidity import liquidity_within_bps
 from hlbot.features.microprice import microprice
 from hlbot.features.order_book_imbalance import order_book_imbalance, weighted_order_book_imbalance
-from hlbot.features.spread import spread_bps
+from hlbot.features.spread import mid_price, spread_bps
 from hlbot.features.trade_flow import rolling_trade_flow_imbalance
 from hlbot.features.volatility import volatility
 from hlbot.models.order_book import OrderBookSnapshot
@@ -22,6 +22,7 @@ class EventStudyPoint:
     offset_seconds: int
     target_ts: float
     market_ts: float
+    mid_price: float
     spread_bps: float
     imbalance_1: float
     imbalance_5: float
@@ -59,6 +60,7 @@ def capture_market_point(event_ts: float, offset_seconds: int, snapshots: list[O
         offset_seconds=offset_seconds,
         target_ts=target_ts,
         market_ts=snapshot.exchange_ts,
+        mid_price=mid_price(snapshot),
         spread_bps=spread_bps(snapshot),
         imbalance_1=order_book_imbalance(snapshot, 1),
         imbalance_5=order_book_imbalance(snapshot, 5),
