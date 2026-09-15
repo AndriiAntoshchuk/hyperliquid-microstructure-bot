@@ -78,3 +78,45 @@ def load_order_books(path: str | Path) -> list[OrderBookSnapshot]:
         )
 
     return snapshots
+
+def load_market_data_directory(data_dir: str | Path, trading_pair: str) -> tuple[list[OrderBookSnapshot], list[Trade]]:
+    directory = Path(data_dir)
+
+    book_files = sorted(directory.glob(
+        f"hyperliquid_perpetual_{trading_pair}_order_book_snapshots_*.txt"
+    ))
+
+    trade_files = sorted(directory.glob(
+        f"hyperliquid_perpetual_{trading_pair}_trades_*.txt"
+    ))
+
+    snapshots = []
+    trades = []
+
+    for path in book_files:
+        snapshots.extend(load_order_books(path))
+
+    for path in trade_files:
+        trades.extend(load_trades(path))
+
+    unique_snapshots = {}
+    unique_trades = {}
+
+    for snapshot in snapshots:
+        key = (snapshot.exchange, snapshot.trading_pair, snapshot.update_id)
+        unique_snapshots[key] = snapshot
+
+    for trade in trades:
+        unique_trades[trade.trade_id] = trade
+
+    snapshots = sorted(
+        unique_snapshots.values(),
+        key=lambda snapshot: (snapshot.exchange_ts, snapshot.local_ts)
+    )
+
+    trades = sorted(
+        unique_trades.values(),
+        key=lambda trade: (trade.exchange_ts, trade.local_ts)
+    )
+
+    return snapshots, trades
