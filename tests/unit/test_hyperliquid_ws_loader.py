@@ -1,7 +1,9 @@
 import json
+import gzip
 
 from hlbot.data.hyperliquid_ws_loader import load_ws_market_data, load_ws_order_books, load_ws_trades
 from hlbot.models.trade import TradeSide
+
 
 def make_book_record(timestamp_ms: int = 1000000) -> dict:
     return {
@@ -123,3 +125,29 @@ def test_load_ws_market_data_across_files(tmp_path):
     assert snapshots[0].exchange_ts == 1000
     assert snapshots[1].exchange_ts == 2000
     assert len(trades) == 2
+
+def test_load_ws_order_books_supports_gzip(tmp_path):
+    path = tmp_path / "hyperliquid_ws_PONS_l2Book_2026-09-14.jsonl.gz"
+    record = {
+        "channel": "l2Book",
+        "coin": "PONS",
+        "local_receive_ns": 1_000_000_000,
+        "local_receive_ts": 1.0,
+        "data": {
+            "coin": "PONS",
+            "time": 1000,
+            "levels": [
+                [{"px": "99", "sz": "2"}],
+                [{"px": "101", "sz": "3"}]
+            ]
+        }
+    }
+
+    with gzip.open(path, "wt") as file: file.write(json.dumps(record) + "\n")
+
+    snapshots = load_ws_order_books(path)
+
+    assert len(snapshots) == 1
+    assert snapshots[0].trading_pair == "PONS-USD"
+    assert snapshots[0].bids[0].price == 99
+    assert snapshots[0].asks[0].price == 101
