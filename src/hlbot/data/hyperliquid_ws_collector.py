@@ -9,7 +9,7 @@ from typing import Iterable
 import websockets
 
 MAINNET_WS_URL = "wss://api.hyperliquid.xyz/ws"
-COLLECTOR_VERSION = "0.2.0"
+COLLECTOR_VERSION = "0.3.0"
 HEARTBEAT_SECONDS = 30
 STATUS_SECONDS = 10
 MAX_RECONNECT_SECONDS = 30
@@ -34,6 +34,12 @@ def build_subscriptions(coins: str | Iterable[str], fast_l2: bool = True) -> tup
         if fast_l2: book["fast"] = True
         subscriptions.extend((book, {"type": "bbo", "coin": coin}, {"type": "trades", "coin": coin}))
     return tuple(subscriptions)
+
+def load_universe_coins(path: str | Path, fallback: Iterable[str]) -> tuple[str, ...]:
+    path = Path(path)
+    if not path.exists(): return normalize_coins(fallback)
+    coins = json.loads(path.read_text()).get("coins", [])
+    return normalize_coins(coins or fallback)
 
 def extract_coin(channel: str, data) -> str | None:
     if channel in {"l2Book", "bbo"} and isinstance(data, dict): return data.get("coin")
@@ -86,8 +92,44 @@ async def status_reporter(stats: dict) -> None:
             flush=True
         )
 
-async def collect_connection(coins: str | Iterable[str], data_dir: str | Path, url: str = MAINNET_WS_URL, fast_l2: bool = True) -> None:
-    coins = normalize_coins(coins)
+async def sync_subscriptions(websocket, active: set[str], desired: Iterable[str], fast_l2: bool = True) -> None:
+    desired = set(normalize_coins(desired))
+    removed = active - desired
+    added = desired - active
+
+    for subscription in build_subscriptions(removed, fast_l2) if removed else ():
+        await websocket.send(json.dumps({"method": "unsubscribe", "subscription": subscription}))
+
+    for subscription in build_subscriptions(added, fast_l2) if added else ():
+        await websocket.send(json.dumps({"method": "subscribe", "subscription": subscription}))
+
+    if removed: print(f"Unsubscribed: {', '.join(sorted(removed))}", flush=True)
+    if added: print(f"Subscribed: {', '.join(sorted(added))}", flush=True)
+
+    active -= removed
+    active |= added
+
+async def universe_watcher(websocket, active, universe_file, fallback, refresh_seconds, fast_l2) -> None:
+    while True:
+        await asyncio.sleep(refresh_seconds)
+        try:
+            desired = load_universe_coins(universe_file, fallback)
+            await sync_subscriptions(websocket, active, desired, fast_l2)
+        except Exception as error:
+            print(f"Universe refresh error: {error}", flush=True)
+
+async def collect_connection(
+    coins: str | Iterable[str],
+    data_dir: str | Path,
+    url: str = MAINNET_WS_URL,
+    fast_l2: bool = True,
+    universe_file: str | Path | None = None,
+    refresh_seconds: float = 30
+) -> None:
+    fallback_coins = normalize_coins(coins)
+    coins = load_universe_coins(universe_file, fallback_coins) if universe_file else fallback_coins
+    active_coins = set(coins)
+
     connection_id = uuid.uuid4().hex
     message_index = 0
     stats = {"started": time.monotonic(), "books": 0, "bbo": 0, "trade_messages": 0, "trades": 0, "bytes": 0}
@@ -104,6 +146,19 @@ async def collect_connection(coins: str | Iterable[str], data_dir: str | Path, u
 
         heartbeat_task = asyncio.create_task(heartbeat(websocket))
         status_task = asyncio.create_task(status_reporter(stats))
+        universe_task = None
+
+        if universe_file:
+            universe_task = asyncio.create_task(
+                universe_watcher(
+                    websocket,
+                    active_coins,
+                    universe_file,
+                    fallback_coins,
+                    refresh_seconds,
+                    fast_l2
+                )
+            )
 
         try:
             async for raw_message in websocket:
@@ -115,6 +170,7 @@ async def collect_connection(coins: str | Iterable[str], data_dir: str | Path, u
                 data = message.get("data")
                 coin = extract_coin(channel, data)
                 if not coin: continue
+                if universe_file and coin not in active_coins: continue
 
                 message_index += 1
                 record = build_record(channel, data, coin, connection_id, message_index, received_ns, fast_l2)
@@ -128,16 +184,35 @@ async def collect_connection(coins: str | Iterable[str], data_dir: str | Path, u
         finally:
             heartbeat_task.cancel()
             status_task.cancel()
-            for task in (heartbeat_task, status_task):
+            if universe_task: universe_task.cancel()
+
+            tasks = [heartbeat_task, status_task]
+            if universe_task: tasks.append(universe_task)
+
+            for task in tasks:
                 try: await task
                 except asyncio.CancelledError: pass
 
-async def run_collector(coins: str | Iterable[str], data_dir: str | Path, url: str = MAINNET_WS_URL, fast_l2: bool = True) -> None:
+async def run_collector(
+    coins: str | Iterable[str],
+    data_dir: str | Path,
+    url: str = MAINNET_WS_URL,
+    fast_l2: bool = True,
+    universe_file: str | Path | None = None,
+    refresh_seconds: float = 30
+) -> None:
     delay = 1
     while True:
         try:
             print(f"Connecting to Hyperliquid WebSocket for {', '.join(normalize_coins(coins))}...", flush=True)
-            await collect_connection(coins, data_dir, url, fast_l2)
+            await collect_connection(
+                coins,
+                data_dir,
+                url,
+                fast_l2,
+                universe_file,
+                refresh_seconds
+            )
             delay = 1
         except asyncio.CancelledError:
             raise
