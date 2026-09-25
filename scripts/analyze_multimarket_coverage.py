@@ -3,11 +3,11 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 from hlbot.data.coverage import find_coverage_segments, timestamp_has_coverage
+from hlbot.data.hyperliquid_ws_loader import load_ws_market_data
 from hlbot.data.market_data_loader import load_market_data_directory
 from hlbot.data.wallet_loader import HyperliquidWalletLoader
 from hlbot.wallet_analysis.episode_builder import EpisodeBuilder
 
-COVERAGE_MAX_GAP = 15
 COVERAGE_MARGIN = 30
 
 DEFAULT_WALLETS = [
@@ -19,21 +19,32 @@ DEFAULT_WALLETS = [
 
 MARKETS = ("PONS", "CASHCAT", "PURR", "LIT")
 
+SOURCE_DIRS = {
+    "deep": "data/raw/hummingbot_vps",
+    "fast": "data/raw/hyperliquid_ws_fast"
+}
+
+SOURCE_MAX_GAP = {
+    "deep": 15,
+    "fast": 2
+}
+
 def utc(timestamp: float) -> str:
     return datetime.fromtimestamp(timestamp, timezone.utc).isoformat()
 
+def load_market_data(source: str, data_dir: str, coin: str):
+    if source == "fast": return load_ws_market_data(data_dir, coin)
+    return load_market_data_directory(data_dir, f"{coin}-USD")
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--data-dir",
-        default="data/raw/hummingbot_vps"
-    )
-    parser.add_argument(
-        "--wallets",
-        nargs="+",
-        default=DEFAULT_WALLETS
-    )
+    parser.add_argument("--source", choices=("deep", "fast"), default="deep")
+    parser.add_argument("--data-dir")
+    parser.add_argument("--wallets", nargs="+", default=DEFAULT_WALLETS)
     args = parser.parse_args()
+
+    data_dir = args.data_dir or SOURCE_DIRS[args.source]
+    max_gap = SOURCE_MAX_GAP[args.source]
 
     loader = HyperliquidWalletLoader()
     episodes_by_wallet = {}
@@ -42,14 +53,15 @@ def main():
         fills = loader.load_saved(wallet)
         episodes_by_wallet[wallet] = EpisodeBuilder().build(fills)
 
+    print(f"Source: {args.source}")
+    print(f"Data directory: {data_dir}")
+    print(f"Coverage max gap: {max_gap}s")
+    print(f"Coverage margin: {COVERAGE_MARGIN}s")
+
     total_covered = 0
 
     for coin in MARKETS:
-        trading_pair = f"{coin}-USD"
-        snapshots, trades = load_market_data_directory(
-            args.data_dir,
-            trading_pair
-        )
+        snapshots, trades = load_market_data(args.source, data_dir, coin)
 
         print()
         print(f"===== {coin} =====")
@@ -62,10 +74,7 @@ def main():
 
         market_start = snapshots[0].exchange_ts
         market_end = snapshots[-1].exchange_ts
-        segments = find_coverage_segments(
-            snapshots,
-            max_gap_seconds=COVERAGE_MAX_GAP
-        )
+        segments = find_coverage_segments(snapshots, max_gap_seconds=max_gap)
 
         print(f"Market start: {utc(market_start)}")
         print(f"Market end:   {utc(market_end)}")
@@ -126,7 +135,6 @@ def main():
 
         if covered_by_day:
             print("  qualified by UTC day:")
-
             for day, count in sorted(covered_by_day.items()):
                 print(f"    {day}: {count}")
 
