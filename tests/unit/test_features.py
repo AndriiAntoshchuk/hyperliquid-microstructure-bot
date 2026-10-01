@@ -1,4 +1,5 @@
 import pytest
+import math
 
 from hlbot.features.liquidity import liquidity_within_bps
 from hlbot.features.microprice import microprice
@@ -8,6 +9,7 @@ from hlbot.features.trade_flow import buy_sell_volume, rolling_trade_flow_imbala
 from hlbot.features.volatility import log_returns, volatility
 from hlbot.models.order_book import OrderBookLevel, OrderBookSnapshot
 from hlbot.models.trade import Trade, TradeSide
+from hlbot.features.volatility import log_returns, realized_volatility
 
 def make_snapshot() -> OrderBookSnapshot:
     return OrderBookSnapshot(
@@ -131,3 +133,10 @@ def test_invalid_parameters():
 
     with pytest.raises(ValueError):
         log_returns([100, 0])
+
+def test_realized_volatility():
+    prices = [100, 101, 100, 102]
+    returns = log_returns(prices)
+    expected = math.sqrt(sum(value * value for value in returns))
+
+    assert realized_volatility(prices) == pytest.approx(expected)
