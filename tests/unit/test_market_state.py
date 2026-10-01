@@ -89,3 +89,28 @@ def test_missing_history_returns_none():
 def test_invalid_snapshot_age():
     with pytest.raises(ValueError):
         build_market_state(1000, make_snapshots(), [], max_snapshot_age=0)
+
+def test_market_state_builder_matches_function():
+    from hlbot.strategy.market_state import MarketStateBuilder
+
+    snapshots = make_snapshots()
+    trades = [
+        make_trade(998, TradeSide.BUY, 10, "buy"),
+        make_trade(999, TradeSide.SELL, 5, "sell")
+    ]
+
+    expected = build_market_state(1000, snapshots, trades)
+    actual = MarketStateBuilder(snapshots, trades).build(1000)
+
+    assert actual == expected
+
+def test_market_state_builder_reuses_index():
+    from hlbot.strategy.market_state import MarketStateBuilder
+
+    builder = MarketStateBuilder(make_snapshots(), [])
+
+    first = builder.build(1000)
+    second = builder.build(1000)
+
+    assert first is not None
+    assert second == first

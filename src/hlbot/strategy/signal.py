@@ -23,23 +23,22 @@ class MarketState:
     ask_liquidity_10bps: float
     return_5s: float
     return_30s: float
+    bid_visible_notional_5: float = 0.0
+    ask_visible_notional_5: float = 0.0
 
     def __post_init__(self):
         for name, value in vars(self).items():
-            if not isfinite(value):
-                raise ValueError(f"{name} must be finite")
+            if not isfinite(value): raise ValueError(f"{name} must be finite")
 
-        if self.mid_price <= 0:
-            raise ValueError("mid_price must be positive")
-
-        if self.spread_bps < 0:
-            raise ValueError("spread_bps cannot be negative")
-
-        if self.volatility_10s < 0:
-            raise ValueError("volatility_10s cannot be negative")
+        if self.mid_price <= 0: raise ValueError("mid_price must be positive")
+        if self.spread_bps < 0: raise ValueError("spread_bps cannot be negative")
+        if self.volatility_10s < 0: raise ValueError("volatility_10s cannot be negative")
 
         if self.bid_liquidity_10bps < 0 or self.ask_liquidity_10bps < 0:
             raise ValueError("liquidity cannot be negative")
+
+        if self.bid_visible_notional_5 < 0 or self.ask_visible_notional_5 < 0:
+            raise ValueError("visible notional cannot be negative")
 
 @dataclass(frozen=True)
 class SignalDecision:
@@ -48,12 +47,8 @@ class SignalDecision:
     reason: str = ""
 
     def __post_init__(self):
-        if not isfinite(self.strength):
-            raise ValueError("strength must be finite")
-
-        if not 0 <= self.strength <= 1:
-            raise ValueError("strength must be between 0 and 1")
-
+        if not isfinite(self.strength): raise ValueError("strength must be finite")
+        if not 0 <= self.strength <= 1: raise ValueError("strength must be between 0 and 1")
         if self.direction == SignalDirection.NONE and self.strength != 0:
             raise ValueError("NONE signal must have zero strength")
 
@@ -63,8 +58,4 @@ class SignalModel(Protocol):
 
 class NoSignalModel:
     def evaluate(self, state: MarketState) -> SignalDecision:
-        return SignalDecision(
-            direction=SignalDirection.NONE,
-            strength=0.0,
-            reason="No calibrated signal model"
-        )
+        return SignalDecision(SignalDirection.NONE, 0.0, "No calibrated signal model")
