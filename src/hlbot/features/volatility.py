@@ -8,3 +8,7 @@ def log_returns(prices: list[float]) -> list[float]:
 def volatility(prices: list[float]) -> float:
     returns = log_returns(prices)
     return 0.0 if len(returns) < 2 else pstdev(returns)
+
+def realized_volatility(prices: list[float]) -> float:
+    returns = log_returns(prices)
+    return math.sqrt(sum(value * value for value in returns))
