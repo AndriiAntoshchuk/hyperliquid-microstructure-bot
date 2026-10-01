@@ -11,6 +11,7 @@ class StrategySpec:
     max_holding_seconds: float | None = None
     stop_loss_pct: float | None = None
     take_profit_pct: float | None = None
+    max_visible_liquidity_fraction: float | None = None
 
     def __post_init__(self):
         _require_positive("base_order_notional", self.base_order_notional)
@@ -28,22 +29,22 @@ class StrategySpec:
         _require_optional_positive("stop_loss_pct", self.stop_loss_pct)
         _require_optional_positive("take_profit_pct", self.take_profit_pct)
 
+        if self.max_visible_liquidity_fraction is not None:
+            if not isfinite(self.max_visible_liquidity_fraction) or not 0 < self.max_visible_liquidity_fraction <= 1:
+                raise ValueError("max_visible_liquidity_fraction must be in (0, 1]")
+
     @property
     def max_entry_orders(self) -> int:
         return self.max_scale_ins + 1
 
 def _require_positive(name: str, value: float) -> None:
-    if not isfinite(value) or value <= 0:
-        raise ValueError(f"{name} must be positive and finite")
+    if not isfinite(value) or value <= 0: raise ValueError(f"{name} must be positive and finite")
 
 def _require_optional_positive(name: str, value: float | None) -> None:
-    if value is not None:
-        _require_positive(name, value)
+    if value is not None: _require_positive(name, value)
 
 def scale_order_notional(spec: StrategySpec, scale_index: int) -> float:
-    if scale_index < 0:
-        raise ValueError("scale_index cannot be negative")
-
+    if scale_index < 0: raise ValueError("scale_index cannot be negative")
     return spec.base_order_notional * spec.scale_order_multiplier ** scale_index
 
 def remaining_position_capacity(spec: StrategySpec, current_position_notional: float) -> float:
@@ -53,13 +54,9 @@ def remaining_position_capacity(spec: StrategySpec, current_position_notional: f
     return max(0.0, spec.max_position_notional - current_position_notional)
 
 def next_order_notional(spec: StrategySpec, current_position_notional: float, scale_index: int) -> float:
-    if scale_index < 0:
-        raise ValueError("scale_index cannot be negative")
-
-    if scale_index > spec.max_scale_ins:
-        return 0.0
+    if scale_index < 0: raise ValueError("scale_index cannot be negative")
+    if scale_index > spec.max_scale_ins: return 0.0
 
     requested = scale_order_notional(spec, scale_index)
     capacity = remaining_position_capacity(spec, current_position_notional)
-
     return min(requested, capacity)

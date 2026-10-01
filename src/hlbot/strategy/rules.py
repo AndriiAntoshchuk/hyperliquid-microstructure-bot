@@ -10,7 +10,11 @@ class ExitReason(Enum):
     STOP_LOSS = "stop_loss"
     TAKE_PROFIT = "take_profit"
     MAX_HOLDING_TIME = "max_holding_time"
-
+    THESIS_DECAY = "thesis_decay"
+    OPPOSITE_SIGNAL = "opposite_signal"
+    TRAILING_GIVEBACK = "trailing_giveback"
+    NO_FOLLOW_THROUGH = "no_follow_through"
+    
 @dataclass(frozen=True)
 class PositionState:
     direction: SignalDirection
