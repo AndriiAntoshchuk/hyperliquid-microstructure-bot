@@ -14,3 +14,16 @@ data/raw/**
 data/processed/**
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+# Local research data and generated artifacts
+data/
+reports/
+local_snapshots/
+
+# Generated project/context exports
+PROJECT_CODE_CONTEXT.md
+
+# Local research output files
+counterfactual_inventory_*.txt
+inventory_feature_value_*.txt
+inventory_value_*.txt
+pons_wallets_analysis.txt
