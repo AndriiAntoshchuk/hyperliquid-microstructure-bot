@@ -37,6 +37,10 @@ class OrderIntent:
         if not isfinite(self.signal_strength) or not 0 <= self.signal_strength <= 1:
             raise ValueError("signal_strength must be between 0 and 1")
 
+    @property
+    def increases_exposure(self) -> bool:
+        return True
+
 def build_order_intent(
     spec: StrategySpec,
     signal: SignalDecision,

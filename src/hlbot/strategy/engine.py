@@ -1,7 +1,9 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import Enum
 from math import isfinite
 
+from hlbot.strategy.liquidity_sizing import cap_notional
+from hlbot.strategy.position_policy import PositionPolicy
 from hlbot.strategy.order_intent import OrderIntent, build_order_intent
 from hlbot.strategy.rules import ExitDecision, PositionState, apply_entry_filters, evaluate_exit
 from hlbot.strategy.scale_in import ActivePositionSizing, build_scale_in_intent
@@ -23,34 +25,17 @@ class StrategyPosition:
     scale_ins_used: int
 
     def __post_init__(self):
-        if self.direction == SignalDirection.NONE:
-            raise ValueError("position direction cannot be NONE")
-
-        if not isfinite(self.entry_price) or self.entry_price <= 0:
-            raise ValueError("entry_price must be positive and finite")
-
-        if not isfinite(self.entry_ts):
-            raise ValueError("entry_ts must be finite")
-
-        if not isfinite(self.current_notional) or self.current_notional <= 0:
-            raise ValueError("current_notional must be positive and finite")
-
-        if self.scale_ins_used < 0:
-            raise ValueError("scale_ins_used cannot be negative")
+        if self.direction == SignalDirection.NONE: raise ValueError("position direction cannot be NONE")
+        if not isfinite(self.entry_price) or self.entry_price <= 0: raise ValueError("entry_price must be positive and finite")
+        if not isfinite(self.entry_ts): raise ValueError("entry_ts must be finite")
+        if not isfinite(self.current_notional) or self.current_notional <= 0: raise ValueError("current_notional must be positive and finite")
+        if self.scale_ins_used < 0: raise ValueError("scale_ins_used cannot be negative")
 
     def exit_state(self) -> PositionState:
-        return PositionState(
-            direction=self.direction,
-            entry_price=self.entry_price,
-            entry_ts=self.entry_ts
-        )
+        return PositionState(self.direction, self.entry_price, self.entry_ts)
 
     def sizing_state(self) -> ActivePositionSizing:
-        return ActivePositionSizing(
-            direction=self.direction,
-            current_notional=self.current_notional,
-            scale_ins_used=self.scale_ins_used
-        )
+        return ActivePositionSizing(self.direction, self.current_notional, self.scale_ins_used)
 
 @dataclass(frozen=True)
 class StrategyDecision:
@@ -62,61 +47,61 @@ class StrategyDecision:
 
     def __post_init__(self):
         if self.action in {StrategyAction.ENTER, StrategyAction.SCALE_IN}:
-            if self.order_intent is None:
-                raise ValueError("order action requires order_intent")
-
-            if self.exit_decision is not None:
-                raise ValueError("order action cannot contain exit_decision")
+            if self.order_intent is None: raise ValueError("order action requires order_intent")
+            if self.exit_decision is not None: raise ValueError("order action cannot contain exit_decision")
 
         if self.action == StrategyAction.EXIT:
             if self.exit_decision is None or not self.exit_decision.should_exit:
                 raise ValueError("exit action requires active exit_decision")
-
-            if self.order_intent is not None:
-                raise ValueError("exit action cannot contain order_intent")
+            if self.order_intent is not None: raise ValueError("exit action cannot contain order_intent")
 
         if self.action == StrategyAction.HOLD and self.order_intent is not None:
             raise ValueError("hold action cannot contain order_intent")
 
 class StrategyEngine:
-    def __init__(self, spec: StrategySpec, signal_model: SignalModel):
+    def __init__(
+        self,
+        spec: StrategySpec,
+        signal_model: SignalModel,
+        position_policy: PositionPolicy | None = None
+    ):
         self.spec = spec
         self.signal_model = signal_model
+        self.position_policy = position_policy
 
     def evaluate(self, state: MarketState, position: StrategyPosition | None = None) -> StrategyDecision:
         raw_signal = self.signal_model.evaluate(state)
         effective_signal = apply_entry_filters(self.spec, state, raw_signal)
 
-        if position is None:
-            return self._evaluate_flat(raw_signal, effective_signal)
-
+        if position is None: return self._evaluate_flat(state, raw_signal, effective_signal)
         return self._evaluate_position(state, position, raw_signal, effective_signal)
+
+    def _apply_liquidity_cap(self, state: MarketState, intent: OrderIntent | None) -> OrderIntent | None:
+        if intent is None or self.spec.max_visible_liquidity_fraction is None: return intent
+
+        notional = cap_notional(
+            intent.notional,
+            state.bid_visible_notional_5,
+            state.ask_visible_notional_5,
+            self.spec.max_visible_liquidity_fraction
+        )
+
+        if notional <= 0: return None
+        return replace(intent, notional=notional)
 
     def _evaluate_flat(
         self,
+        state: MarketState,
         raw_signal: SignalDecision,
         effective_signal: SignalDecision
     ) -> StrategyDecision:
-        intent = build_order_intent(
-            spec=self.spec,
-            signal=effective_signal,
-            current_position_notional=0,
-            scale_index=0
-        )
+        intent = build_order_intent(self.spec, effective_signal, 0, 0)
+        intent = self._apply_liquidity_cap(state, intent)
 
         if intent is None:
-            return StrategyDecision(
-                action=StrategyAction.HOLD,
-                raw_signal=raw_signal,
-                effective_signal=effective_signal
-            )
+            return StrategyDecision(StrategyAction.HOLD, raw_signal, effective_signal)
 
-        return StrategyDecision(
-            action=StrategyAction.ENTER,
-            raw_signal=raw_signal,
-            effective_signal=effective_signal,
-            order_intent=intent
-        )
+        return StrategyDecision(StrategyAction.ENTER, raw_signal, effective_signal, order_intent=intent)
 
     def _evaluate_position(
         self,
@@ -125,38 +110,33 @@ class StrategyEngine:
         raw_signal: SignalDecision,
         effective_signal: SignalDecision
     ) -> StrategyDecision:
-        exit_decision = evaluate_exit(
-            self.spec,
-            position.exit_state(),
-            state
-        )
+        exit_decision = evaluate_exit(self.spec, position.exit_state(), state)
+
+        exit_decision = evaluate_exit(self.spec, position.exit_state(), state)
 
         if exit_decision.should_exit:
             return StrategyDecision(
-                action=StrategyAction.EXIT,
-                raw_signal=raw_signal,
-                effective_signal=effective_signal,
+                StrategyAction.EXIT,
+                raw_signal,
+                effective_signal,
                 exit_decision=exit_decision
             )
 
-        intent = build_scale_in_intent(
-            spec=self.spec,
-            position=position.sizing_state(),
-            state=state,
-            signal=effective_signal
-        )
+        if self.position_policy is not None:
+            exit_decision = self.position_policy.evaluate(state, position.exit_state())
+
+            if exit_decision.should_exit:
+                return StrategyDecision(
+                    StrategyAction.EXIT,
+                    raw_signal,
+                    effective_signal,
+                    exit_decision=exit_decision
+                )
+
+        intent = build_scale_in_intent(self.spec, position.sizing_state(), state, effective_signal)
+        intent = self._apply_liquidity_cap(state, intent)
 
         if intent is None:
-            return StrategyDecision(
-                action=StrategyAction.HOLD,
-                raw_signal=raw_signal,
-                effective_signal=effective_signal,
-                exit_decision=exit_decision
-            )
+            return StrategyDecision(StrategyAction.HOLD, raw_signal, effective_signal, exit_decision=exit_decision)
 
-        return StrategyDecision(
-            action=StrategyAction.SCALE_IN,
-            raw_signal=raw_signal,
-            effective_signal=effective_signal,
-            order_intent=intent
-        )
+        return StrategyDecision(StrategyAction.SCALE_IN, raw_signal, effective_signal, order_intent=intent)
