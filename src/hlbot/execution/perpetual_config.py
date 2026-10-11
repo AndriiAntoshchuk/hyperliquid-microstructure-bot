@@ -29,4 +29,4 @@ class PerpetualExecutionConfig:
     def market(self, coin: str) -> PerpetualMarketConfig:
         for market in self.markets:
             if market.coin == coin: return market
-        raise KeyError(f"unknown coin: {coin}")
+        raise KeyError(f"unknown coin: {coin}")	
