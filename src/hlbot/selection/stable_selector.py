@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from statistics import median
 
-from hlbot.selection.engine import MarketSelectionSnapshot
 
 MarketKey = tuple[str, str]
 

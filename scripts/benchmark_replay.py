@@ -41,7 +41,7 @@ def main():
     times = []
     for _ in range(args.runs):
         start = time.perf_counter_ns()
-        result = backtester.run(snapshots, trades)
+        backtester.run(snapshots, trades)
         times.append((time.perf_counter_ns() - start) / 1e9)
 
     seconds = median(times)

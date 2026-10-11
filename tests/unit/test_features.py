@@ -9,7 +9,7 @@ from hlbot.features.trade_flow import buy_sell_volume, rolling_trade_flow_imbala
 from hlbot.features.volatility import log_returns, volatility
 from hlbot.models.order_book import OrderBookLevel, OrderBookSnapshot
 from hlbot.models.trade import Trade, TradeSide
-from hlbot.features.volatility import log_returns, realized_volatility
+from hlbot.features.volatility import realized_volatility
 
 def make_snapshot() -> OrderBookSnapshot:
     return OrderBookSnapshot(

@@ -2,11 +2,9 @@ import pytest
 
 from hlbot.execution.account_tracker import AccountTracker
 from hlbot.execution.event_processor import ExecutionEventProcessor
-from hlbot.execution.fill import ExecutionFill
 from hlbot.execution.latency import ExecutionLatencyTracker, ExecutionStage
 from hlbot.execution.order_state import ExecutionOrderState, OrderStatus
 from hlbot.execution.order_tracker import OrderTracker
-from hlbot.models.trade import TradeSide
 
 def setup(status=OrderStatus.PENDING):
     orders = OrderTracker()

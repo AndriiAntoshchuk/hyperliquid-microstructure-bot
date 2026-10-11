@@ -1,6 +1,5 @@
 import pytest
 
-from hlbot.backtest.accounting import BacktestPosition
 from hlbot.backtest.execution import SimulatedFill
 from hlbot.backtest.performance import max_drawdown, summarize_replay
 from hlbot.backtest.replay import ReplayEquityPoint, ReplayFill, ReplayResult, ReplayTrade
