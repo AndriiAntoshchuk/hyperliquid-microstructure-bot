@@ -2,7 +2,13 @@ import math
 
 import pytest
 
-from hlbot.strategy.signal import MarketState, NoSignalModel, SignalDecision, SignalDirection
+from hlbot.strategy.signal import (
+    MarketState,
+    NoSignalModel,
+    SignalDecision,
+    SignalDirection,
+)
+
 
 def make_state() -> MarketState:
     return MarketState(

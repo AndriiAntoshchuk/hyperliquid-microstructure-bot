@@ -1,9 +1,18 @@
 import pytest
 
-from hlbot.backtest.accounting import close_position, fee_amount, open_position, position_notional, scale_position, total_pnl, unrealized_pnl
+from hlbot.backtest.accounting import (
+    close_position,
+    fee_amount,
+    open_position,
+    position_notional,
+    scale_position,
+    total_pnl,
+    unrealized_pnl,
+)
 from hlbot.backtest.execution import SimulatedFill
 from hlbot.models.trade import TradeSide
 from hlbot.strategy.signal import SignalDirection
+
 
 def make_fill(side: TradeSide, price: float, quantity: float) -> SimulatedFill:
     notional = price * quantity

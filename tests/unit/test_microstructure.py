@@ -1,10 +1,18 @@
 import pytest
 
-from hlbot.features.liquidity import book_depth_notional, liquidity_notional_within_bps, liquidity_within_bps
+from hlbot.features.liquidity import (
+    book_depth_notional,
+    liquidity_notional_within_bps,
+    liquidity_within_bps,
+)
 from hlbot.features.microprice import microprice, microprice_delta_bps
-from hlbot.features.order_book_imbalance import order_book_imbalance, weighted_order_book_imbalance
+from hlbot.features.order_book_imbalance import (
+    order_book_imbalance,
+    weighted_order_book_imbalance,
+)
 from hlbot.features.spread import mid_price, spread_bps
 from hlbot.models.order_book import OrderBookLevel, OrderBookSnapshot
+
 
 @pytest.fixture
 def snapshot():

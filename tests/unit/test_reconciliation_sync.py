@@ -1,7 +1,15 @@
 import pytest
 
-from hlbot.execution.reconciliation import ReconciliationIssue, ReconciliationIssueType, ReconciliationReport
-from hlbot.execution.reconciliation_sync import ReconciliationSyncGate, ReconciliationSyncState
+from hlbot.execution.reconciliation import (
+    ReconciliationIssue,
+    ReconciliationIssueType,
+    ReconciliationReport,
+)
+from hlbot.execution.reconciliation_sync import (
+    ReconciliationSyncGate,
+    ReconciliationSyncState,
+)
+
 
 def healthy_report():
     return ReconciliationReport(())

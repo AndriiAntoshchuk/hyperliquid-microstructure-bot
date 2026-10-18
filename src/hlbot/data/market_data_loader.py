@@ -1,9 +1,10 @@
 import json
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 from hlbot.models.order_book import OrderBookLevel, OrderBookSnapshot
 from hlbot.models.trade import Trade, TradeSide
+
 
 def _iter_json_objects(path: str | Path, chunk_size: int = 1024 * 1024) -> Iterator[dict]:
     decoder = json.JSONDecoder()
@@ -29,7 +30,7 @@ def _iter_json_objects(path: str | Path, chunk_size: int = 1024 * 1024) -> Itera
                     buffer = buffer[index:]
                     break
 
-                if not isinstance(row, dict): raise ValueError(f"Expected JSON object in {path}")
+                if not isinstance(row, dict): raise TypeError(f"Expected JSON object in {path}")
 
                 yield row
                 index = end

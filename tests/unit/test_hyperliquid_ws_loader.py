@@ -1,7 +1,11 @@
-import json
 import gzip
+import json
 
-from hlbot.data.hyperliquid_ws_loader import load_ws_market_data, load_ws_order_books, load_ws_trades
+from hlbot.data.hyperliquid_ws_loader import (
+    load_ws_market_data,
+    load_ws_order_books,
+    load_ws_trades,
+)
 from hlbot.models.trade import TradeSide
 
 

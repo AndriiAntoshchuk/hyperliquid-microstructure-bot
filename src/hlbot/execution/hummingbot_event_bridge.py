@@ -6,6 +6,7 @@ from hlbot.execution.fill import ExecutionFill
 from hlbot.execution.order_state import OrderStatus
 from hlbot.models.trade import TradeSide
 
+
 class ReplacementEventHandler(Protocol):
     def on_cancelled(self, client_order_id: str): ...
     def invalidate(self, client_order_id: str, reason: str): ...
@@ -87,9 +88,9 @@ class HummingbotExecutionEventBridge:
             fill_id=self._fill_id(event),
             client_order_id=client_order_id,
             coin=self.coin_resolver(trading_pair),
-            side=self._trade_side(getattr(event, "trade_type")),
-            quantity=float(getattr(event, "amount")),
-            price=float(getattr(event, "price")),
+            side=self._trade_side(event.trade_type),
+            quantity=float(event.amount),
+            price=float(event.price),
             fee=float(self.fee_resolver(event)),
             timestamp=self._timestamp(event)
         )
@@ -128,7 +129,7 @@ class HummingbotExecutionEventBridge:
 
     @staticmethod
     def _timestamp(event: Any) -> float:
-        timestamp = float(getattr(event, "timestamp"))
+        timestamp = float(event.timestamp)
         if timestamp <= 0: raise ValueError("event timestamp must be positive")
         return timestamp
 

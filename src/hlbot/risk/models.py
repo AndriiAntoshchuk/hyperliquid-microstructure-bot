@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from math import isfinite
 
+
 class RiskViolation(Enum):
     KILL_SWITCH = "kill_switch"
     CONNECTION_UNHEALTHY = "connection_unhealthy"
@@ -87,8 +88,7 @@ class RiskContext:
         if self.open_orders < 0:
             raise ValueError("open_orders cannot be negative")
 
-        if self.execution_latency_ms is not None:
-            if not isfinite(self.execution_latency_ms) or self.execution_latency_ms < 0:
+        if self.execution_latency_ms is not None and (not isfinite(self.execution_latency_ms) or self.execution_latency_ms < 0):
                 raise ValueError("execution_latency_ms must be non-negative and finite")
 
     @property

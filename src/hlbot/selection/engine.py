@@ -2,8 +2,16 @@ from dataclasses import dataclass
 
 from hlbot.data.universe_collector import UniverseMarket
 from hlbot.features.market_activity import MarketActivityTracker
-from hlbot.features.market_activity_window import MarketActivityWindow, RollingMarketActivity
-from hlbot.selection.market_selector import MarketCandidate, MarketSelector, MarketSelectorConfig
+from hlbot.features.market_activity_window import (
+    MarketActivityWindow,
+    RollingMarketActivity,
+)
+from hlbot.selection.market_selector import (
+    MarketCandidate,
+    MarketSelector,
+    MarketSelectorConfig,
+)
+
 
 @dataclass(frozen=True)
 class MarketSelectionSnapshot:
@@ -18,10 +26,12 @@ class MarketSelectionSnapshot:
 class MarketSelectionEngine:
     def __init__(
         self,
-        config: MarketSelectorConfig = MarketSelectorConfig(),
+        config: MarketSelectorConfig = None,
         history_seconds: float = 3600,
         max_gap_seconds: float = 120
     ):
+        if config is None:
+            config = MarketSelectorConfig()
         self.tracker = MarketActivityTracker(max_gap_seconds)
         self.window = MarketActivityWindow(history_seconds, max_gap_seconds)
         self.selector = MarketSelector(config)

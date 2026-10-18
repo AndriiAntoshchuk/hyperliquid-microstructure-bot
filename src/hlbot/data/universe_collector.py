@@ -2,7 +2,7 @@ import json
 import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from urllib.request import Request, urlopen
@@ -123,7 +123,7 @@ class UniverseCollector:
     def _write(self, rows: tuple[UniverseMarket, ...]) -> None:
         if not rows: raise ValueError("cannot write empty universe snapshot")
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        day = datetime.fromtimestamp(rows[0].ts, timezone.utc).date().isoformat()
+        day = datetime.fromtimestamp(rows[0].ts, UTC).date().isoformat()
         path = self.output_dir / f"universe_{day}.jsonl"
         payload = "".join(json.dumps(asdict(row), separators=(",", ":")) + "\n" for row in rows)
 

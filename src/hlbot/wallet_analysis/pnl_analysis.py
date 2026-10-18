@@ -1,10 +1,11 @@
 import math
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from statistics import mean, median
 
 from hlbot.models.trading_episode import TradingEpisode
+
 
 @dataclass(frozen=True)
 class WalletPerformanceReport:
@@ -113,7 +114,7 @@ def group_pnl_by_time(episodes: list[TradingEpisode], format_string: str) -> dic
     result = defaultdict(float)
 
     for episode in episodes:
-        key = datetime.fromtimestamp(episode.end_ts, tz=timezone.utc).strftime(format_string)
+        key = datetime.fromtimestamp(episode.end_ts, tz=UTC).strftime(format_string)
         result[key] += episode.realized_pnl
 
     return dict(sorted(result.items()))
@@ -128,7 +129,7 @@ def group_pnl_by_hour(episodes: list[TradingEpisode]) -> dict[int, float]:
     result = defaultdict(float)
 
     for episode in episodes:
-        hour = datetime.fromtimestamp(episode.end_ts, tz=timezone.utc).hour
+        hour = datetime.fromtimestamp(episode.end_ts, tz=UTC).hour
         result[hour] += episode.realized_pnl
 
     return dict(sorted(result.items()))

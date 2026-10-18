@@ -5,7 +5,10 @@ from dataclasses import dataclass
 from hlbot.data.coverage import CoverageSegment, timestamp_has_coverage
 from hlbot.features.liquidity import liquidity_within_bps
 from hlbot.features.microprice import microprice
-from hlbot.features.order_book_imbalance import order_book_imbalance, weighted_order_book_imbalance
+from hlbot.features.order_book_imbalance import (
+    order_book_imbalance,
+    weighted_order_book_imbalance,
+)
 from hlbot.features.spread import mid_price, spread_bps
 from hlbot.features.trade_flow import rolling_trade_flow_imbalance
 from hlbot.features.volatility import volatility

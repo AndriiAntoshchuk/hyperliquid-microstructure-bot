@@ -1,7 +1,12 @@
 import pytest
 
 from hlbot.models.order_book import OrderBookLevel, OrderBookSnapshot
-from hlbot.strategy.liquidity_sizing import liquidity_capped_notional, safe_visible_notional, visible_notional
+from hlbot.strategy.liquidity_sizing import (
+    liquidity_capped_notional,
+    safe_visible_notional,
+    visible_notional,
+)
+
 
 def make_snapshot():
     return OrderBookSnapshot(

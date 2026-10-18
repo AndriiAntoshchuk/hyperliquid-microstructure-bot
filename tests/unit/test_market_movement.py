@@ -5,8 +5,9 @@ import pytest
 
 from hlbot.features.market_movement import (
     latest_realized_volatility,
-    realized_volatility
+    realized_volatility,
 )
+
 
 def test_realized_volatility():
     prices = (100, 101, 100)

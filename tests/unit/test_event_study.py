@@ -1,6 +1,11 @@
 from hlbot.models.order_book import OrderBookLevel, OrderBookSnapshot
 from hlbot.models.trade import Trade, TradeSide
-from hlbot.research.event_study import capture_market_point, latest_snapshot_before, sample_inactive_times
+from hlbot.research.event_study import (
+    capture_market_point,
+    latest_snapshot_before,
+    sample_inactive_times,
+)
+
 
 def make_snapshot(timestamp: float) -> OrderBookSnapshot:
     return OrderBookSnapshot(

@@ -3,8 +3,9 @@ import pytest
 from hlbot.execution.latency import (
     ExecutionLatencyTracker,
     ExecutionStage,
-    summarize_latencies
+    summarize_latencies,
 )
+
 
 def completed_trace(tracker: ExecutionLatencyTracker, trace_id: str, start: int = 1_000_000_000):
     tracker.start(trace_id, start)

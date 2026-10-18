@@ -1,7 +1,15 @@
 import pytest
 
-from hlbot.execution.reconciliation import ReconciliationIssue, ReconciliationIssueType, ReconciliationReport
-from hlbot.execution.reconciliation_policy import ReconciliationAction, ReconciliationPolicy
+from hlbot.execution.reconciliation import (
+    ReconciliationIssue,
+    ReconciliationIssueType,
+    ReconciliationReport,
+)
+from hlbot.execution.reconciliation_policy import (
+    ReconciliationAction,
+    ReconciliationPolicy,
+)
+
 
 def test_healthy_report_allows_trading():
     decision = ReconciliationPolicy().evaluate(ReconciliationReport(()))

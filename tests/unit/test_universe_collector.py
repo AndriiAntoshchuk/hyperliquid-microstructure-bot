@@ -1,7 +1,13 @@
 import json
 
 import pytest
-from hlbot.data.universe_collector import UniverseCollector, fetch_universe_snapshot, parse_asset_contexts
+
+from hlbot.data.universe_collector import (
+    UniverseCollector,
+    fetch_universe_snapshot,
+    parse_asset_contexts,
+)
+
 
 def meta(name="PONS", delisted=False):
     return {

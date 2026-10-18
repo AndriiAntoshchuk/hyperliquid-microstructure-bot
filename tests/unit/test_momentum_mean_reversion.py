@@ -3,7 +3,14 @@ import pytest
 from hlbot.models.trading_episode import TradingEpisode
 from hlbot.models.wallet_fill import WalletFill
 from hlbot.research.event_study import EventStudyPoint
-from hlbot.research.momentum_mean_reversion import analyze_episode, classify_entry_style, price_return_pct, signed_return, summarize_observations
+from hlbot.research.momentum_mean_reversion import (
+    analyze_episode,
+    classify_entry_style,
+    price_return_pct,
+    signed_return,
+    summarize_observations,
+)
+
 
 def make_fill(side: str = "buy") -> WalletFill:
     return WalletFill(

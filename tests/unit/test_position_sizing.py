@@ -2,7 +2,14 @@ import pytest
 
 from hlbot.models.trading_episode import TradingEpisode
 from hlbot.models.wallet_fill import WalletFill
-from hlbot.wallet_analysis.position_sizing import analyze_episode_sizing, build_order_executions, end_position, position_change_type, summarize_position_sizing
+from hlbot.wallet_analysis.position_sizing import (
+    analyze_episode_sizing,
+    build_order_executions,
+    end_position,
+    position_change_type,
+    summarize_position_sizing,
+)
+
 
 def make_fill(timestamp: float, price: float, quantity: float, side: str, start_position: float, order_id: int) -> WalletFill:
     return WalletFill(

@@ -1,6 +1,12 @@
 import pytest
 
-from hlbot.strategy.specification import StrategySpec, next_order_notional, remaining_position_capacity, scale_order_notional
+from hlbot.strategy.specification import (
+    StrategySpec,
+    next_order_notional,
+    remaining_position_capacity,
+    scale_order_notional,
+)
+
 
 def make_spec() -> StrategySpec:
     return StrategySpec(

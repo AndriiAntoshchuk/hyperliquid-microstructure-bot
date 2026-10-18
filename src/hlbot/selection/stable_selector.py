@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from statistics import median
 
-
 MarketKey = tuple[str, str]
 
 @dataclass(frozen=True)
@@ -55,8 +54,11 @@ class StableSelectionPlan:
     collection: tuple[CollectionMember, ...]
     trading_candidates: tuple[CollectionMember, ...]
 
-def aggregate_market_selection(snapshots, config=StableSelectionConfig()):
+def aggregate_market_selection(snapshots, config=None):
     if not snapshots: return ()
+
+    if config is None:
+        config = StableSelectionConfig()
 
     scores, ranks = {}, {}
     for snapshot in snapshots:
@@ -89,7 +91,10 @@ def aggregate_market_selection(snapshots, config=StableSelectionConfig()):
         in enumerate(rows, 1)
     )
 
-def build_stable_selection_plan(markets, epoch_ts, previous_collection_since=None,config=StableSelectionConfig()):
+def build_stable_selection_plan(markets, epoch_ts, previous_collection_since=None,config=None):
+    if config is None:
+        config = StableSelectionConfig()
+
     previous = previous_collection_since or {}
     by_key = {(row.dex, row.coin): row for row in markets}
 

@@ -1,7 +1,7 @@
 import argparse
 import json
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from hlbot.models.wallet_fill import WalletFill
@@ -20,7 +20,7 @@ def load_fills(path: Path) -> list[WalletFill]:
     return fills
 
 def format_time(timestamp: float) -> str:
-    return datetime.fromtimestamp(timestamp, tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    return datetime.fromtimestamp(timestamp, tz=UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
 def end_position(fill: WalletFill) -> float | None:
     if fill.start_position is None: return None

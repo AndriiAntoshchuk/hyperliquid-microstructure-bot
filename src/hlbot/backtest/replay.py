@@ -1,8 +1,22 @@
 import bisect
 from dataclasses import dataclass
 
-from hlbot.backtest.accounting import BacktestPosition, close_position, open_position, position_notional, scale_position, unrealized_pnl
-from hlbot.backtest.execution import SimulatedFill, entry_side, execution_slippage_bps, exit_side, simulate_exit_order, simulate_market_order
+from hlbot.backtest.accounting import (
+    BacktestPosition,
+    close_position,
+    open_position,
+    position_notional,
+    scale_position,
+    unrealized_pnl,
+)
+from hlbot.backtest.execution import (
+    SimulatedFill,
+    entry_side,
+    execution_slippage_bps,
+    exit_side,
+    simulate_exit_order,
+    simulate_market_order,
+)
 from hlbot.backtest.execution_policy import ExecutionMode, ExecutionPolicy
 from hlbot.backtest.fees import FeeSchedule
 from hlbot.backtest.latency import ExecutionLatency
@@ -14,6 +28,7 @@ from hlbot.strategy.engine import StrategyAction, StrategyEngine, StrategyPositi
 from hlbot.strategy.market_state import MarketStateBuilder
 from hlbot.strategy.order_intent import OrderIntent
 from hlbot.strategy.signal import SignalDirection
+
 
 @dataclass(frozen=True)
 class ReplayFill:

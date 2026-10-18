@@ -1,0 +1,14 @@
+{
+  "coin": "DEMO",
+  "signal": "demo_mean_reversion",
+  "signal_parameters": {"entry_return_5s_bps": -30.0},
+  "strategy": {
+    "base_order_notional": 100.0,
+    "max_position_notional": 100.0,
+    "max_scale_ins": 0,
+    "max_holding_seconds": 8.0,
+    "max_spread_bps": 20.0
+  },
+  "fee_bps": 4.5,
+  "max_snapshot_age": 2.0
+}

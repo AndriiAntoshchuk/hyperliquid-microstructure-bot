@@ -6,8 +6,9 @@ from hlbot.features.execution_quality import (
     analyze_execution_quality,
     percentile,
     walk_book,
-    walk_book_many
+    walk_book_many,
 )
+
 
 def write_books(tmp_path, coin, rows):
     path = tmp_path / f"hyperliquid_ws_{coin}_l2Book_2026-09-23.jsonl"

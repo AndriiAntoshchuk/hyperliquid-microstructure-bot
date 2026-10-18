@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from math import isfinite
 
+
 class OrderStatus(Enum):
     PENDING = "pending"
     OPEN = "open"
@@ -59,8 +60,7 @@ class ExecutionOrderState:
         if not isfinite(self.filled_quantity) or self.filled_quantity < 0:
             raise ValueError("filled_quantity must be non-negative and finite")
 
-        if self.average_fill_price is not None:
-            if not isfinite(self.average_fill_price) or self.average_fill_price <= 0:
+        if self.average_fill_price is not None and (not isfinite(self.average_fill_price) or self.average_fill_price <= 0):
                 raise ValueError("average_fill_price must be positive and finite")
 
         if self.filled_quantity == 0 and self.average_fill_price is not None:

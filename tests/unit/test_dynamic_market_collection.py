@@ -1,10 +1,8 @@
 import asyncio
 import json
 
-from hlbot.data.hyperliquid_ws_collector import (
-    load_universe_coins,
-    sync_subscriptions
-)
+from hlbot.data.hyperliquid_ws_collector import load_universe_coins, sync_subscriptions
+
 
 class WebSocket:
     def __init__(self):

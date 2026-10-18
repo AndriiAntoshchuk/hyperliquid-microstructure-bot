@@ -1,11 +1,12 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from hlbot.backtest.capital import CapitalPoint, build_capital_curve
 from hlbot.backtest.replay import ReplayResult
 
+
 def timestamps_to_utc(timestamps):
-    return [datetime.fromtimestamp(timestamp, timezone.utc) for timestamp in timestamps]
+    return [datetime.fromtimestamp(timestamp, UTC) for timestamp in timestamps]
 
 def drawdown_curve(curve: tuple[CapitalPoint, ...]) -> tuple[float, ...]:
     if not curve: return ()

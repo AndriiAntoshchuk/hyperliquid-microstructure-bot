@@ -1,7 +1,11 @@
 import pytest
 
-from hlbot.features.trade_flow import rolling_trade_flow_features, rolling_trade_flow_imbalance
+from hlbot.features.trade_flow import (
+    rolling_trade_flow_features,
+    rolling_trade_flow_imbalance,
+)
 from hlbot.models.trade import Trade, TradeSide
+
 
 def trade(trade_id, ts, quantity, side):
     return Trade(

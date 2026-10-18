@@ -2,10 +2,16 @@ import pytest
 
 from hlbot.backtest.execution import SimulatedFill
 from hlbot.backtest.performance import max_drawdown, summarize_replay
-from hlbot.backtest.replay import ReplayEquityPoint, ReplayFill, ReplayResult, ReplayTrade
+from hlbot.backtest.replay import (
+    ReplayEquityPoint,
+    ReplayFill,
+    ReplayResult,
+    ReplayTrade,
+)
 from hlbot.models.trade import TradeSide
 from hlbot.strategy.engine import StrategyAction
 from hlbot.strategy.signal import SignalDirection
+
 
 def make_fill(notional: float, slippage_bps: float) -> ReplayFill:
     return ReplayFill(

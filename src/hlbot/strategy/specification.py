@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from math import isfinite
 
+
 @dataclass(frozen=True)
 class StrategySpec:
     base_order_notional: float
@@ -29,8 +30,7 @@ class StrategySpec:
         _require_optional_positive("stop_loss_pct", self.stop_loss_pct)
         _require_optional_positive("take_profit_pct", self.take_profit_pct)
 
-        if self.max_visible_liquidity_fraction is not None:
-            if not isfinite(self.max_visible_liquidity_fraction) or not 0 < self.max_visible_liquidity_fraction <= 1:
+        if self.max_visible_liquidity_fraction is not None and (not isfinite(self.max_visible_liquidity_fraction) or not 0 < self.max_visible_liquidity_fraction <= 1):
                 raise ValueError("max_visible_liquidity_fraction must be in (0, 1]")
 
     @property

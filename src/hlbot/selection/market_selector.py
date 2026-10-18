@@ -47,8 +47,8 @@ class MarketCandidate:
     warm: bool
 
 class MarketSelector:
-    def __init__(self, config: MarketSelectorConfig = MarketSelectorConfig()):
-        self.config = config
+    def __init__(self, config: MarketSelectorConfig | None = None):
+        self.config = config if config is not None else MarketSelectorConfig()
 
     def select(self, rows: tuple[RollingMarketActivity, ...]) -> tuple[MarketCandidate, ...]:
         active = tuple(row for row in rows if self._eligible(row))

@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from math import isfinite
 
 from hlbot.execution.fill import ExecutionFill
+
 
 @dataclass(frozen=True)
 class LivePosition:
@@ -14,8 +15,7 @@ class LivePosition:
         if not self.coin: raise ValueError("coin cannot be empty")
         if not isfinite(self.quantity): raise ValueError("quantity must be finite")
 
-        if self.average_entry_price is not None:
-            if not isfinite(self.average_entry_price) or self.average_entry_price <= 0:
+        if self.average_entry_price is not None and (not isfinite(self.average_entry_price) or self.average_entry_price <= 0):
                 raise ValueError("average_entry_price must be positive and finite")
 
         if self.quantity == 0 and self.average_entry_price is not None:
@@ -101,7 +101,7 @@ class AccountTracker:
         self._gross_realized_pnl += realized
         self._fees += fill.fee
 
-        day = datetime.fromtimestamp(fill.timestamp, timezone.utc).date().isoformat()
+        day = datetime.fromtimestamp(fill.timestamp, UTC).date().isoformat()
         self._daily_realized_pnl[day] = self._daily_realized_pnl.get(day, 0.0) + realized - fill.fee
 
         self._update_peak_equity()
@@ -155,7 +155,7 @@ class AccountTracker:
         return self._peak_equity
 
     def realized_pnl_for_day(self, timestamp: float) -> float:
-        day = datetime.fromtimestamp(timestamp, timezone.utc).date().isoformat()
+        day = datetime.fromtimestamp(timestamp, UTC).date().isoformat()
         return self._daily_realized_pnl.get(day, 0.0)
 
     def snapshot(self) -> AccountSnapshot:

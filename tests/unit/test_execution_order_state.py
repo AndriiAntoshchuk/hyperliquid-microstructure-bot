@@ -1,6 +1,11 @@
 import pytest
 
-from hlbot.execution.order_state import ExecutionOrderState, OrderStatus, validate_transition
+from hlbot.execution.order_state import (
+    ExecutionOrderState,
+    OrderStatus,
+    validate_transition,
+)
+
 
 def state(status: OrderStatus = OrderStatus.PENDING, **overrides) -> ExecutionOrderState:
     values = {

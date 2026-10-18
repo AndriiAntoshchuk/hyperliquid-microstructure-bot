@@ -2,8 +2,14 @@ import pytest
 
 from hlbot.strategy.engine import StrategyAction, StrategyEngine, StrategyPosition
 from hlbot.strategy.rules import ExitReason
-from hlbot.strategy.signal import MarketState, NoSignalModel, SignalDecision, SignalDirection
+from hlbot.strategy.signal import (
+    MarketState,
+    NoSignalModel,
+    SignalDecision,
+    SignalDirection,
+)
 from hlbot.strategy.specification import StrategySpec
+
 
 class FixedSignalModel:
     def __init__(self, direction: SignalDirection, strength: float = 0.8):

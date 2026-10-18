@@ -1,15 +1,20 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from hlbot.data.hyperliquid_ws_collector import build_record, output_path, utc_date_from_ns
+from hlbot.data.hyperliquid_ws_collector import (
+    build_record,
+    output_path,
+    utc_date_from_ns,
+)
+
 
 def test_utc_date_from_ns():
-    timestamp = datetime(2026, 9, 12, 12, 0, tzinfo=timezone.utc)
+    timestamp = datetime(2026, 9, 12, 12, 0, tzinfo=UTC)
     timestamp_ns = int(timestamp.timestamp() * 1_000_000_000)
 
     assert utc_date_from_ns(timestamp_ns) == "2026-09-12"
 
 def test_output_path():
-    timestamp = datetime(2026, 9, 12, 12, 0, tzinfo=timezone.utc)
+    timestamp = datetime(2026, 9, 12, 12, 0, tzinfo=UTC)
     timestamp_ns = int(timestamp.timestamp() * 1_000_000_000)
 
     path = output_path("data", "PONS", "l2Book", timestamp_ns)

@@ -2,9 +2,16 @@ from dataclasses import dataclass
 from enum import Enum
 from math import isfinite
 
-from hlbot.backtest.maker import MakerFill, MakerOrder, place_maker_order, simulate_maker_fill, trade_can_fill
+from hlbot.backtest.maker import (
+    MakerFill,
+    MakerOrder,
+    place_maker_order,
+    simulate_maker_fill,
+    trade_can_fill,
+)
 from hlbot.models.order_book import OrderBookSnapshot
 from hlbot.models.trade import Trade
+
 
 class MakerOrderStatus(str, Enum):
     OPEN = "open"

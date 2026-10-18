@@ -2,11 +2,14 @@ import asyncio
 import json
 import time
 import uuid
-from datetime import datetime, timezone
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 import websockets
+
+from hlbot.data.buffered_writer import BufferedJSONLWriter
+from hlbot.data.hyperliquid_ws_paths import output_path
+from hlbot.data.hyperliquid_ws_paths import utc_date_from_ns as _utc_date_from_ns
 
 MAINNET_WS_URL = "wss://api.hyperliquid.xyz/ws"
 COLLECTOR_VERSION = "0.3.0"
@@ -14,12 +17,7 @@ HEARTBEAT_SECONDS = 30
 STATUS_SECONDS = 10
 MAX_RECONNECT_SECONDS = 30
 CHANNELS = {"l2Book", "bbo", "trades"}
-
-def utc_date_from_ns(timestamp_ns: int) -> str:
-    return datetime.fromtimestamp(timestamp_ns / 1_000_000_000, timezone.utc).strftime("%Y-%m-%d")
-
-def output_path(data_dir: str | Path, coin: str, channel: str, timestamp_ns: int) -> Path:
-    return Path(data_dir) / f"hyperliquid_ws_{coin}_{channel}_{utc_date_from_ns(timestamp_ns)}.jsonl"
+utc_date_from_ns = _utc_date_from_ns
 
 def normalize_coins(coins: str | Iterable[str]) -> tuple[str, ...]:
     if isinstance(coins, str): coins = (coins,)
@@ -81,14 +79,18 @@ async def heartbeat(websocket) -> None:
         await asyncio.sleep(HEARTBEAT_SECONDS)
         await websocket.send(json.dumps({"method": "ping"}))
 
-async def status_reporter(stats: dict) -> None:
+async def status_reporter(stats: dict, writer: BufferedJSONLWriter) -> None:
     while True:
         await asyncio.sleep(STATUS_SECONDS)
         elapsed = time.monotonic() - stats["started"]
         print(
             f"[{elapsed:7.1f}s] books={stats['books']} | bbo={stats['bbo']} | "
             f"trade messages={stats['trade_messages']} | trades={stats['trades']} | "
-            f"written={human_bytes(stats['bytes'])}",
+            f"written={human_bytes(writer.metrics.bytes_written)} | "
+            f"records/s={writer.metrics.records_written / max(elapsed, 1e-9):.0f} | "
+            f"queue={writer.queued}/{writer.queue.maxsize} | "
+            f"peak={writer.metrics.queue_peak} | "
+            f"backpressure={writer.metrics.enqueue_wait_seconds:.3f}s",
             flush=True
         )
 
@@ -124,7 +126,10 @@ async def collect_connection(
     url: str = MAINNET_WS_URL,
     fast_l2: bool = True,
     universe_file: str | Path | None = None,
-    refresh_seconds: float = 30
+    refresh_seconds: float = 30,
+    queue_size: int = 4096,
+    batch_size: int = 256,
+    flush_interval: float = 0.25
 ) -> None:
     fallback_coins = normalize_coins(coins)
     coins = load_universe_coins(universe_file, fallback_coins) if universe_file else fallback_coins
@@ -132,7 +137,7 @@ async def collect_connection(
 
     connection_id = uuid.uuid4().hex
     message_index = 0
-    stats = {"started": time.monotonic(), "books": 0, "bbo": 0, "trade_messages": 0, "trades": 0, "bytes": 0}
+    stats = {"started": time.monotonic(), "books": 0, "bbo": 0, "trade_messages": 0, "trades": 0}
 
     async with websockets.connect(url, ping_interval=None, max_queue=1024) as websocket:
         print(f"Connected to {url}", flush=True)
@@ -145,7 +150,9 @@ async def collect_connection(
         print(f"Saving to: {Path(data_dir).resolve()}", flush=True)
 
         heartbeat_task = asyncio.create_task(heartbeat(websocket))
-        status_task = asyncio.create_task(status_reporter(stats))
+        writer = BufferedJSONLWriter(data_dir, max_queue=queue_size, batch_size=batch_size, flush_interval=flush_interval)
+        await writer.start()
+        status_task = asyncio.create_task(status_reporter(stats, writer))
         universe_task = None
 
         if universe_file:
@@ -174,7 +181,7 @@ async def collect_connection(
 
                 message_index += 1
                 record = build_record(channel, data, coin, connection_id, message_index, received_ns, fast_l2)
-                stats["bytes"] += write_record(data_dir, record)
+                await writer.write(record)
 
                 if channel == "l2Book": stats["books"] += 1
                 elif channel == "bbo": stats["bbo"] += 1
@@ -193,13 +200,20 @@ async def collect_connection(
                 try: await task
                 except asyncio.CancelledError: pass
 
+            await writer.close()  # Drain accepted events before reconnecting.
+            print(f"Writer flushed {writer.metrics.records_written} records "
+                  f"in {writer.metrics.batches_written} batches", flush=True)
+
 async def run_collector(
     coins: str | Iterable[str],
     data_dir: str | Path,
     url: str = MAINNET_WS_URL,
     fast_l2: bool = True,
     universe_file: str | Path | None = None,
-    refresh_seconds: float = 30
+    refresh_seconds: float = 30,
+    queue_size: int = 4096,
+    batch_size: int = 256,
+    flush_interval: float = 0.25
 ) -> None:
     delay = 1
     while True:
@@ -211,7 +225,10 @@ async def run_collector(
                 url,
                 fast_l2,
                 universe_file,
-                refresh_seconds
+                refresh_seconds,
+                queue_size,
+                batch_size,
+                flush_interval
             )
             delay = 1
         except asyncio.CancelledError:

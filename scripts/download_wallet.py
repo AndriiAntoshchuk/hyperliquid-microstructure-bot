@@ -1,10 +1,11 @@
 import argparse
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from hlbot.data.wallet_loader import HyperliquidWalletLoader
 
+
 def parse_date(value: str) -> int:
-    dt = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    dt = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=UTC)
     return int(dt.timestamp() * 1000)
 
 def main():

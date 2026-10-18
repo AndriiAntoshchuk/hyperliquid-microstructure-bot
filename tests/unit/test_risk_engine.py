@@ -1,8 +1,9 @@
+from hlbot.execution.instruction import entry_instruction, exit_instruction
 from hlbot.risk.engine import RiskEngine
 from hlbot.risk.models import RiskContext, RiskLimits, RiskViolation
 from hlbot.strategy.order_intent import OrderIntent, OrderIntentType
 from hlbot.strategy.signal import SignalDirection
-from hlbot.execution.instruction import entry_instruction, exit_instruction
+
 
 def intent(notional: float = 100) -> OrderIntent:
     return OrderIntent(

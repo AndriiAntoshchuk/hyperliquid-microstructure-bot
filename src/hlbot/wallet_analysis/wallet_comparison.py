@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from itertools import combinations
 from statistics import mean, median
 
 from hlbot.models.trading_episode import TradingEpisode
 from hlbot.wallet_analysis.pnl_analysis import analyze_wallet_performance
+
 
 @dataclass(frozen=True)
 class WalletSummary:
@@ -73,7 +74,7 @@ def summarize_wallet(wallet: str, episodes: list[TradingEpisode]) -> WalletSumma
     durations = [episode.duration for episode in episodes]
     fills_per_episode = [episode.number_of_fills for episode in episodes]
     notionals = [episode_max_position_notional(episode) for episode in episodes]
-    hours = {datetime.fromtimestamp(episode.start_ts, tz=timezone.utc).hour for episode in episodes}
+    hours = {datetime.fromtimestamp(episode.start_ts, tz=UTC).hour for episode in episodes}
 
     return WalletSummary(
         wallet=wallet,

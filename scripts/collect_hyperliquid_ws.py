@@ -16,7 +16,10 @@ async def run(args):
             args.data_dir,
             fast_l2=not args.deep_l2,
             universe_file=universe_file,
-            refresh_seconds=args.refresh_seconds
+            refresh_seconds=args.refresh_seconds,
+            queue_size=args.queue_size,
+            batch_size=args.batch_size,
+            flush_interval=args.flush_interval
         )
     )
 
@@ -41,6 +44,9 @@ def main():
     parser.add_argument("--dynamic", action="store_true")
     parser.add_argument("--universe-file", default=DEFAULT_UNIVERSE)
     parser.add_argument("--refresh-seconds", type=float, default=30)
+    parser.add_argument("--queue-size", type=int, default=4096)
+    parser.add_argument("--batch-size", type=int, default=256)
+    parser.add_argument("--flush-interval", type=float, default=0.25)
     args = parser.parse_args()
     asyncio.run(run(args))
 

@@ -1,7 +1,7 @@
 import argparse
 import json
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from hlbot.data.universe_collector import UniverseMarket
@@ -11,8 +11,9 @@ from hlbot.selection.stable_selector import (
     StableSelectionConfig,
     aggregate_market_selection,
     build_stable_selection_plan,
-    collection_since_map
+    collection_since_map,
 )
+
 
 def snapshots(directory):
     ts, rows = None, []
@@ -57,7 +58,7 @@ def write(path, payload):
     tmp.replace(path)
 
 def iso(ts):
-    return datetime.fromtimestamp(ts, timezone.utc).isoformat()
+    return datetime.fromtimestamp(ts, UTC).isoformat()
 
 def main():
     parser = argparse.ArgumentParser()

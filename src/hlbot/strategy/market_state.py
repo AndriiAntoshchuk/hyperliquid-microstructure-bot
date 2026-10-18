@@ -2,7 +2,10 @@ import bisect
 
 from hlbot.features.liquidity import book_depth_notional, liquidity_within_bps
 from hlbot.features.microprice import microprice
-from hlbot.features.order_book_imbalance import order_book_imbalance, weighted_order_book_imbalance
+from hlbot.features.order_book_imbalance import (
+    order_book_imbalance,
+    weighted_order_book_imbalance,
+)
 from hlbot.features.spread import mid_price, spread_bps
 from hlbot.features.trade_flow import trade_flow_imbalance
 from hlbot.features.volatility import realized_volatility

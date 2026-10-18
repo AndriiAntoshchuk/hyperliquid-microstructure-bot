@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 
-from hlbot.features.execution_quality import (
-    ExecutionQuality,
-    analyze_execution_curve
-)
+from hlbot.features.execution_quality import ExecutionQuality, analyze_execution_curve
+
 
 @dataclass(frozen=True)
 class ExecutionCapacity:

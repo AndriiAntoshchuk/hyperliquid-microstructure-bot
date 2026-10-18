@@ -1,15 +1,24 @@
-import pytest
 import math
+
+import pytest
 
 from hlbot.features.liquidity import liquidity_within_bps
 from hlbot.features.microprice import microprice
-from hlbot.features.order_book_imbalance import order_book_imbalance, weighted_order_book_imbalance
+from hlbot.features.order_book_imbalance import (
+    order_book_imbalance,
+    weighted_order_book_imbalance,
+)
 from hlbot.features.spread import mid_price, spread, spread_bps
-from hlbot.features.trade_flow import buy_sell_volume, rolling_trade_flow_imbalance, trade_flow_imbalance, trades_in_window
-from hlbot.features.volatility import log_returns, volatility
+from hlbot.features.trade_flow import (
+    buy_sell_volume,
+    rolling_trade_flow_imbalance,
+    trade_flow_imbalance,
+    trades_in_window,
+)
+from hlbot.features.volatility import log_returns, realized_volatility, volatility
 from hlbot.models.order_book import OrderBookLevel, OrderBookSnapshot
 from hlbot.models.trade import Trade, TradeSide
-from hlbot.features.volatility import realized_volatility
+
 
 def make_snapshot() -> OrderBookSnapshot:
     return OrderBookSnapshot(

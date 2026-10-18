@@ -1,10 +1,18 @@
 import pytest
 
-from hlbot.backtest.execution import entry_side, execution_slippage_bps, exit_side, simulate_exit_order, simulate_market_order, simulate_quantity_order
+from hlbot.backtest.execution import (
+    entry_side,
+    execution_slippage_bps,
+    exit_side,
+    simulate_exit_order,
+    simulate_market_order,
+    simulate_quantity_order,
+)
 from hlbot.models.order_book import OrderBookLevel, OrderBookSnapshot
 from hlbot.models.trade import TradeSide
 from hlbot.strategy.order_intent import OrderIntent, OrderIntentType
 from hlbot.strategy.signal import SignalDirection
+
 
 def make_snapshot() -> OrderBookSnapshot:
     return OrderBookSnapshot(

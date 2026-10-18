@@ -5,6 +5,7 @@ from pathlib import Path
 
 from hlbot.features.execution_profile import build_execution_profile
 
+
 def write(path, payload):
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
@@ -13,22 +14,10 @@ def write(path, payload):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--selection",
-        default="data/derived/market_selection/collection_universe.json"
-    )
-    parser.add_argument(
-        "--readiness",
-        default="data/derived/market_selection/l2_readiness.json"
-    )
-    parser.add_argument(
-        "--data-dir",
-        default="data/raw/hyperliquid_ws_fast"
-    )
-    parser.add_argument(
-        "--output",
-        default="data/derived/market_selection/execution_profile.json"
-    )
+    parser.add_argument("--selection", default="data/derived/market_selection/collection_universe.json")
+    parser.add_argument("--readiness", default="data/derived/market_selection/l2_readiness.json")
+    parser.add_argument("--data-dir", default="data/raw/hyperliquid_ws_fast")
+    parser.add_argument("--output", default="data/derived/market_selection/execution_profile.json")
     parser.add_argument(
         "--notionals",
         type=float,

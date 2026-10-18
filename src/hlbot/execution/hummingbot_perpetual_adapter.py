@@ -1,8 +1,15 @@
 from decimal import Decimal
 
-from hlbot.execution.interface import AdapterBalance, AdapterOrder, AdapterPosition, PlaceOrderRequest, PositionAction
+from hlbot.execution.interface import (
+    AdapterBalance,
+    AdapterOrder,
+    AdapterPosition,
+    PlaceOrderRequest,
+    PositionAction,
+)
 from hlbot.execution.perpetual_config import MarginMode, PerpetualExecutionConfig
 from hlbot.models.trade import TradeSide
+
 
 class HummingbotPerpetualAdapter:
     def __init__(self, connector, trading_pairs, config, market_type, maker_type, hb_open, hb_close, hb_oneway):
@@ -18,7 +25,8 @@ class HummingbotPerpetualAdapter:
 
     @classmethod
     def from_connector(cls, connector, trading_pairs: dict[str, str], config: PerpetualExecutionConfig):
-        from hummingbot.core.data_type.common import OrderType, PositionAction as HBPositionAction, PositionMode
+        from hummingbot.core.data_type.common import OrderType, PositionMode
+        from hummingbot.core.data_type.common import PositionAction as HBPositionAction
         return cls(
             connector, trading_pairs, config,
             OrderType.MARKET, OrderType.LIMIT_MAKER,

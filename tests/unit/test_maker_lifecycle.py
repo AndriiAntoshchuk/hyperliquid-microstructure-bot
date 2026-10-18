@@ -1,9 +1,14 @@
 import pytest
 
 from hlbot.backtest.maker import place_maker_order
-from hlbot.backtest.maker_lifecycle import MakerOrderStatus, replace_maker_order, simulate_maker_lifecycle
+from hlbot.backtest.maker_lifecycle import (
+    MakerOrderStatus,
+    replace_maker_order,
+    simulate_maker_lifecycle,
+)
 from hlbot.models.order_book import OrderBookLevel, OrderBookSnapshot
 from hlbot.models.trade import Trade, TradeSide
+
 
 def make_snapshot(timestamp: float = 1000, bid_quantity: float = 5) -> OrderBookSnapshot:
     return OrderBookSnapshot(
@@ -195,7 +200,11 @@ def test_pending_maker_can_complete_on_later_step():
     assert pending.last_fill_ts == pytest.approx(1002)
 
 def test_pending_fill_can_be_exported():
-    from hlbot.backtest.maker_lifecycle import PendingMakerOrder, advance_pending_maker, pending_maker_fill
+    from hlbot.backtest.maker_lifecycle import (
+        PendingMakerOrder,
+        advance_pending_maker,
+        pending_maker_fill,
+    )
 
     order = place_maker_order(make_snapshot(), TradeSide.BUY, quantity=2)
     pending = PendingMakerOrder.from_order(order)

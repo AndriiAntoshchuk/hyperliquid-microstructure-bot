@@ -6,8 +6,9 @@ from hlbot.selection.stable_selector import (
     AggregatedMarket,
     StableSelectionConfig,
     aggregate_market_selection,
-    build_stable_selection_plan
+    build_stable_selection_plan,
 )
+
 
 def candidate(coin, score):
     return MarketCandidate(

@@ -1,8 +1,15 @@
 import pytest
 
-from hlbot.strategy.rules import ExitReason, PositionState, apply_entry_filters, evaluate_exit, position_return_pct
+from hlbot.strategy.rules import (
+    ExitReason,
+    PositionState,
+    apply_entry_filters,
+    evaluate_exit,
+    position_return_pct,
+)
 from hlbot.strategy.signal import MarketState, SignalDecision, SignalDirection
 from hlbot.strategy.specification import StrategySpec
+
 
 def make_spec(**kwargs) -> StrategySpec:
     values = {

@@ -1,6 +1,6 @@
 import json
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -130,9 +130,9 @@ class HyperliquidWalletLoader:
 
     @staticmethod
     def _batch_name(wallet: str, start_time_ms: int, end_time_ms: int | None) -> str:
-        start = datetime.fromtimestamp(start_time_ms / 1000, timezone.utc).strftime("%Y-%m-%d")
-        end = datetime.fromtimestamp(end_time_ms / 1000, timezone.utc).strftime("%Y-%m-%d") if end_time_ms is not None else "open"
-        downloaded = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+        start = datetime.fromtimestamp(start_time_ms / 1000, UTC).strftime("%Y-%m-%d")
+        end = datetime.fromtimestamp(end_time_ms / 1000, UTC).strftime("%Y-%m-%d") if end_time_ms is not None else "open"
+        downloaded = datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
         return f"{wallet.lower()}_{start}_{end}_{downloaded}"
 
     def _save_raw(self, batch_name: str, fills: list[dict[str, Any]]) -> None:
@@ -147,7 +147,7 @@ class HyperliquidWalletLoader:
         directory.mkdir(parents=True, exist_ok=True)
 
         with open(directory / f"{batch_name}_fills.jsonl", "w") as file:
-            for fill in fills: file.write(json.dumps(asdict(fill)) + "\n")
+            file.writelines(json.dumps(asdict(fill)) + "\n" for fill in fills)
 
     @staticmethod
     def _validate_wallet(wallet: str) -> None:

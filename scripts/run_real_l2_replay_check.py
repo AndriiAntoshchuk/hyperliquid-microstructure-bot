@@ -1,5 +1,5 @@
 import argparse
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from hlbot.backtest.performance import summarize_replay
 from hlbot.backtest.plotting import save_backtest_charts
@@ -24,7 +24,7 @@ class SingleEntrySignal:
         return SignalDecision(SignalDirection.NONE, 0.0, "no signal")
 
 def utc(timestamp: float) -> str:
-    return datetime.fromtimestamp(timestamp, timezone.utc).isoformat()
+    return datetime.fromtimestamp(timestamp, UTC).isoformat()
 
 def load_data(source: str, data_dir: str, coin: str):
     if source == "fast": return load_ws_market_data(data_dir, coin)

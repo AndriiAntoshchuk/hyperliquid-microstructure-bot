@@ -2,9 +2,6 @@ import json
 import os
 import time
 from datetime import datetime
-from typing import Dict
-
-from pydantic import Field
 
 from hummingbot import data_path
 from hummingbot.connector.connector_base import ConnectorBase
@@ -12,7 +9,7 @@ from hummingbot.core.data_type.common import MarketDict
 from hummingbot.core.event.event_forwarder import SourceInfoEventForwarder
 from hummingbot.core.event.events import OrderBookEvent, OrderBookTradeEvent
 from hummingbot.strategy.strategy_v2_base import StrategyV2Base, StrategyV2ConfigBase
-
+from pydantic import Field
 
 COLLECTOR_VERSION = "0.2.0"
 
@@ -32,7 +29,7 @@ class DownloadTradesAndOrderBookSnapshotsConfig(StrategyV2ConfigBase):
 
 
 class DownloadTradesAndOrderBookSnapshots(StrategyV2Base):
-    depth = int(os.getenv("DEPTH", 20))
+    depth = int(os.getenv("DEPTH", "20"))
 
     last_dump_timestamp = 0
     time_between_csv_dumps = 10
@@ -46,7 +43,7 @@ class DownloadTradesAndOrderBookSnapshots(StrategyV2Base):
 
     def __init__(
         self,
-        connectors: Dict[str, ConnectorBase],
+        connectors: dict[str, ConnectorBase],
         config: DownloadTradesAndOrderBookSnapshotsConfig,
     ):
         super().__init__(connectors, config)

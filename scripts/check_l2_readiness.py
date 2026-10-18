@@ -2,10 +2,11 @@ import argparse
 import json
 import time
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from hlbot.data.l2_coverage import check_l2_coverage
+
 
 def write(path, payload):
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -60,7 +61,7 @@ def main():
     write(Path(args.output), {
         "selection_epoch_ts": selection["epoch_ts"],
         "checked_ts": now,
-        "checked_utc": datetime.fromtimestamp(now, timezone.utc).isoformat(),
+        "checked_utc": datetime.fromtimestamp(now, UTC).isoformat(),
         "window_minutes": args.window_minutes,
         "max_gap_seconds": args.max_gap_seconds,
         "max_age_seconds": args.max_age_seconds,

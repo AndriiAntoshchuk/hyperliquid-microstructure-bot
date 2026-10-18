@@ -1,6 +1,11 @@
 import pytest
 
-from hlbot.execution.perpetual_config import MarginMode, PerpetualExecutionConfig, PerpetualMarketConfig
+from hlbot.execution.perpetual_config import (
+    MarginMode,
+    PerpetualExecutionConfig,
+    PerpetualMarketConfig,
+)
+
 
 def test_market_config():
     config = PerpetualMarketConfig("PONS", 5)

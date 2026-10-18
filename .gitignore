@@ -15,7 +15,8 @@ data/processed/**
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 # Local research data and generated artifacts
-data/
+data/*
+!data/sample/
 reports/
 local_snapshots/
 
@@ -27,3 +28,6 @@ counterfactual_inventory_*.txt
 inventory_feature_value_*.txt
 inventory_value_*.txt
 pons_wallets_analysis.txt
+
+# Keep the tiny deterministic demo dataset under version control.
+!data/sample/*.jsonl

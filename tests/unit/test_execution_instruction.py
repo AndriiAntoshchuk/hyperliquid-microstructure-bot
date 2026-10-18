@@ -1,10 +1,15 @@
 import pytest
 
-from hlbot.execution.instruction import PerpetualOrderInstruction, entry_instruction, exit_instruction
+from hlbot.execution.instruction import (
+    PerpetualOrderInstruction,
+    entry_instruction,
+    exit_instruction,
+)
 from hlbot.execution.interface import PositionAction
 from hlbot.models.trade import TradeSide
 from hlbot.strategy.order_intent import OrderIntent, OrderIntentType
 from hlbot.strategy.signal import SignalDirection
+
 
 def entry(direction: SignalDirection, notional: float = 100) -> OrderIntent:
     return OrderIntent(

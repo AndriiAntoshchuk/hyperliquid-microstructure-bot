@@ -6,8 +6,13 @@ import pytest
 
 from hlbot.execution.hummingbot_perpetual_adapter import HummingbotPerpetualAdapter
 from hlbot.execution.interface import PlaceOrderRequest, PositionAction
-from hlbot.execution.perpetual_config import MarginMode, PerpetualExecutionConfig, PerpetualMarketConfig
+from hlbot.execution.perpetual_config import (
+    MarginMode,
+    PerpetualExecutionConfig,
+    PerpetualMarketConfig,
+)
 from hlbot.models.trade import TradeSide
+
 
 class HBAction(Enum):
     OPEN = "open"
@@ -23,7 +28,7 @@ class FakeConnector:
         self.leverages = {}
         self.account_positions = {}
         self.in_flight_orders = {}
-        self._balances = {"USDC": Decimal("1000")}
+        self._balances = {"USDC": Decimal(1000)}
 
     def set_position_mode(self, mode):
         self.position_mode = mode
@@ -35,7 +40,7 @@ class FakeConnector:
         return self.leverages.get(pair, 1)
 
     def get_price(self, pair, is_buy):
-        return Decimal("10")
+        return Decimal(10)
 
     def quantize_order_amount(self, pair, amount):
         return amount.quantize(Decimal(".01"))
@@ -129,10 +134,10 @@ def test_position_translation():
     connector.leverages["PONS-USDC"] = 5
     connector.account_positions["x"] = SimpleNamespace(
         trading_pair="PONS-USDC",
-        amount=Decimal("-2"),
-        entry_price=Decimal("10"),
-        unrealized_pnl=Decimal("3"),
-        leverage=Decimal("5")
+        amount=Decimal(-2),
+        entry_price=Decimal(10),
+        unrealized_pnl=Decimal(3),
+        leverage=Decimal(5)
     )
 
     position = execution.position("PONS")

@@ -36,7 +36,7 @@ def load_ws_order_books(path: str | Path) -> list[OrderBookSnapshot]:
         if record.get("channel") != "l2Book": continue
 
         data = record.get("data")
-        if not isinstance(data, dict): raise ValueError("l2Book data must be an object")
+        if not isinstance(data, dict): raise TypeError("l2Book data must be an object")
 
         levels = data.get("levels")
         if not isinstance(levels, list) or len(levels) != 2: raise ValueError("l2Book levels must contain bids and asks")
@@ -67,7 +67,7 @@ def load_ws_trades(path: str | Path) -> list[Trade]:
         if record.get("channel") != "trades": continue
 
         data = record.get("data")
-        if not isinstance(data, list): raise ValueError("trades data must be a list")
+        if not isinstance(data, list): raise TypeError("trades data must be a list")
 
         local_ts = _local_ts(record)
 

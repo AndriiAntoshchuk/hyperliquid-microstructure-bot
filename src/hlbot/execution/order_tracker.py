@@ -1,5 +1,6 @@
 from hlbot.execution.order_state import ExecutionOrderState, validate_transition
 
+
 class OrderTracker:
     def __init__(self):
         self._orders: dict[str, ExecutionOrderState] = {}
@@ -24,8 +25,7 @@ class OrderTracker:
         if order.filled_quantity < current.filled_quantity:
             raise ValueError("filled_quantity cannot decrease")
 
-        if current.exchange_order_id is not None:
-            if order.exchange_order_id != current.exchange_order_id:
+        if current.exchange_order_id is not None and order.exchange_order_id != current.exchange_order_id:
                 raise ValueError("exchange_order_id cannot change")
 
         self._orders[order.client_order_id] = order

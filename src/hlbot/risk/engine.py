@@ -2,6 +2,7 @@ from typing import Protocol
 
 from hlbot.risk.models import RiskContext, RiskDecision, RiskLimits, RiskViolation
 
+
 class RiskOrder(Protocol):
     notional: float
 
@@ -42,32 +43,25 @@ class RiskEngine:
         if intent.notional > self.limits.max_order_notional:
             violations.append(RiskViolation.ORDER_LIMIT)
 
-        if intent.increases_exposure:
-            if context.current_position_notional + intent.notional > self.limits.max_position_notional:
+        if intent.increases_exposure and context.current_position_notional + intent.notional > self.limits.max_position_notional:
                 violations.append(RiskViolation.POSITION_LIMIT)
 
-        if self.limits.max_daily_loss is not None:
-            if context.realized_pnl_today <= -self.limits.max_daily_loss:
+        if self.limits.max_daily_loss is not None and context.realized_pnl_today <= -self.limits.max_daily_loss:
                 violations.append(RiskViolation.DAILY_LOSS_LIMIT)
 
-        if self.limits.max_drawdown_pct is not None:
-            if context.drawdown_pct >= self.limits.max_drawdown_pct:
+        if self.limits.max_drawdown_pct is not None and context.drawdown_pct >= self.limits.max_drawdown_pct:
                 violations.append(RiskViolation.DRAWDOWN_LIMIT)
 
-        if self.limits.max_spread_bps is not None:
-            if context.spread_bps > self.limits.max_spread_bps:
+        if self.limits.max_spread_bps is not None and context.spread_bps > self.limits.max_spread_bps:
                 violations.append(RiskViolation.SPREAD_LIMIT)
 
-        if self.limits.max_volatility_10s is not None:
-            if context.volatility_10s > self.limits.max_volatility_10s:
+        if self.limits.max_volatility_10s is not None and context.volatility_10s > self.limits.max_volatility_10s:
                 violations.append(RiskViolation.VOLATILITY_LIMIT)
 
-        if self.limits.max_open_orders is not None:
-            if context.open_orders >= self.limits.max_open_orders:
+        if self.limits.max_open_orders is not None and context.open_orders >= self.limits.max_open_orders:
                 violations.append(RiskViolation.OPEN_ORDER_LIMIT)
 
-        if self.limits.max_execution_latency_ms is not None and context.execution_latency_ms is not None:
-            if context.execution_latency_ms > self.limits.max_execution_latency_ms:
+        if self.limits.max_execution_latency_ms is not None and context.execution_latency_ms is not None and context.execution_latency_ms > self.limits.max_execution_latency_ms:
                 violations.append(RiskViolation.LATENCY_LIMIT)
 
         return RiskDecision(tuple(violations))

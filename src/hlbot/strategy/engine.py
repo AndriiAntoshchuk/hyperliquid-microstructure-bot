@@ -3,12 +3,23 @@ from enum import Enum
 from math import isfinite
 
 from hlbot.strategy.liquidity_sizing import cap_notional
-from hlbot.strategy.position_policy import PositionPolicy
 from hlbot.strategy.order_intent import OrderIntent, build_order_intent
-from hlbot.strategy.rules import ExitDecision, PositionState, apply_entry_filters, evaluate_exit
+from hlbot.strategy.position_policy import PositionPolicy
+from hlbot.strategy.rules import (
+    ExitDecision,
+    PositionState,
+    apply_entry_filters,
+    evaluate_exit,
+)
 from hlbot.strategy.scale_in import ActivePositionSizing, build_scale_in_intent
-from hlbot.strategy.signal import MarketState, SignalDecision, SignalDirection, SignalModel
+from hlbot.strategy.signal import (
+    MarketState,
+    SignalDecision,
+    SignalDirection,
+    SignalModel,
+)
 from hlbot.strategy.specification import StrategySpec
+
 
 class StrategyAction(Enum):
     HOLD = "hold"
@@ -89,12 +100,7 @@ class StrategyEngine:
         if notional <= 0: return None
         return replace(intent, notional=notional)
 
-    def _evaluate_flat(
-        self,
-        state: MarketState,
-        raw_signal: SignalDecision,
-        effective_signal: SignalDecision
-    ) -> StrategyDecision:
+    def _evaluate_flat(self, state: MarketState, raw_signal: SignalDecision, effective_signal: SignalDecision) -> StrategyDecision:
         intent = build_order_intent(self.spec, effective_signal, 0, 0)
         intent = self._apply_liquidity_cap(state, intent)
 
@@ -103,15 +109,7 @@ class StrategyEngine:
 
         return StrategyDecision(StrategyAction.ENTER, raw_signal, effective_signal, order_intent=intent)
 
-    def _evaluate_position(
-        self,
-        state: MarketState,
-        position: StrategyPosition,
-        raw_signal: SignalDecision,
-        effective_signal: SignalDecision
-    ) -> StrategyDecision:
-        exit_decision = evaluate_exit(self.spec, position.exit_state(), state)
-
+    def _evaluate_position(self, state: MarketState, position: StrategyPosition, raw_signal: SignalDecision, effective_signal: SignalDecision) -> StrategyDecision:
         exit_decision = evaluate_exit(self.spec, position.exit_state(), state)
 
         if exit_decision.should_exit:

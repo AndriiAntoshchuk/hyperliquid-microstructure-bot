@@ -4,10 +4,11 @@ from hlbot.data.validators import (
     detect_time_gaps,
     find_duplicate_trade_ids,
     validate_order_book_sequence,
-    validate_unique_trade_ids
+    validate_unique_trade_ids,
 )
 from hlbot.models.order_book import OrderBookLevel, OrderBookSnapshot
 from hlbot.models.trade import Trade, TradeSide
+
 
 def make_trade(trade_id: str) -> Trade:
     return Trade(
