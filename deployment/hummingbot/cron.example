@@ -1,0 +1,1 @@
+*/2 * * * * set -a; . /etc/hlbot/hummingbot-watchdog.env; set +a; /usr/bin/python3 /opt/hlbot/repo/deployment/hummingbot/watchdog.py >> /var/log/hlbot-watchdog.log 2>&1

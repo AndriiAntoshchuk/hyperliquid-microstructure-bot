@@ -31,3 +31,4 @@ pons_wallets_analysis.txt
 
 # Keep the tiny deterministic demo dataset under version control.
 !data/sample/*.jsonl
+.coverage

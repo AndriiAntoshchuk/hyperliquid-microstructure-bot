@@ -1,0 +1,13 @@
+[Unit]
+Description=Hummingbot market-data collector watchdog (example)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=hlbot
+EnvironmentFile=/etc/hlbot/hummingbot-watchdog.env
+ExecStart=/usr/bin/python3 /opt/hlbot/repo/deployment/hummingbot/watchdog.py
+
+[Install]
+WantedBy=multi-user.target

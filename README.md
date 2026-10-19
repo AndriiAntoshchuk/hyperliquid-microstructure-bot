@@ -243,6 +243,10 @@ A separate rolling market scanner is available:
 python scripts/run_market_scanner.py --once
 ```
 
+## Deployment examples
+
+See [deployment/README.md](deployment/README.md) for a runnable Docker Compose setup for the Python WebSocket collector and sanitized Hummingbot watchdog, systemd, and cron examples. These examples do not claim to reproduce the private VPS exactly.
+
 ## Hummingbot integration (optional)
 
 `hummingbot_ext/` contains an alternative Hummingbot Strategy V2 collector and two Hyperliquid connector patches:
